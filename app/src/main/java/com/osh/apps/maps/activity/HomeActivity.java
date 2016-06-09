@@ -1,72 +1,138 @@
 package com.osh.apps.maps.activity;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.support.design.widget.TabLayout;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Toast;
 
 import com.osh.apps.maps.R;
-import com.osh.apps.maps.clickableRecyclerView.ClickableRecyclerView;
-import com.osh.apps.maps.clickableRecyclerView.adapter.PlaceAdapter;
-import com.osh.apps.maps.place.SimplePlaceDetails;
-
-import java.util.ArrayList;
+import com.osh.apps.maps.ViewPagerAdapter;
+import com.osh.apps.maps.fragment.FavoritesFragment;
+import com.osh.apps.maps.fragment.PlacesFragment;
 
 
 public class HomeActivity extends AppCompatActivity
 {
-private ClickableRecyclerView recyclerView;
-private PlaceAdapter adapter;
+private FavoritesFragment favoritesFragment;
+private ViewPagerAdapter viewPagerAdapter;
+private int placesFragmentPosition;
+private PlacesFragment placesFragment;
+private SearchView searchView;
+private ViewPager viewPager;
+
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
     super.onCreate(savedInstanceState);
+
+    ViewPagerAdapter.FragmentItem[] fragmentItems;
+
     setContentView(R.layout.activity_home);
     Toolbar toolbar=(Toolbar) findViewById(R.id.toolbar);
     setSupportActionBar(toolbar);
 
-        FloatingActionButton fab=(FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener()
+    FloatingActionButton fab=(FloatingActionButton) findViewById(R.id.fab);
+    fab.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View view)
             {
-
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+            viewPager.setCurrentItem(placesFragmentPosition,true);
             }
         });
 
+    favoritesFragment=FavoritesFragment.newInstance();
+    placesFragment=PlacesFragment.newInstance();
 
-    setViews();
+    fragmentItems=new ViewPagerAdapter.FragmentItem[]{new ViewPagerAdapter.FragmentItem( placesFragment, getString(R.string.places_tab) ),
+                                                      new ViewPagerAdapter.FragmentItem( favoritesFragment, getString(R.string.favorites_tab) )
+                                                      };
+    placesFragmentPosition=0;
 
-    ArrayList<SimplePlaceDetails> places=new ArrayList<>();
-    places.add(new SimplePlaceDetails(-1,"22fdgds55","Coffee", "jdkdk ,ljso 25", 3.5f));
-    places.add(new SimplePlaceDetails(-1,"22fdgds55","Rest", "jdklnduis , jdjk ,msk sk 68128255545555", 4.0f));
-    places.add(new SimplePlaceDetails(-1,"22fdgds55","Google", "jdkdk ,ljso 25", 5.0f));
-    places.add(new SimplePlaceDetails(-1,"22fdgds55","Temp", "fghdfg jso 1235", 1.5f));
-    places.add(new SimplePlaceDetails(-1,"22fdgds55","Test", "jfgd hdfdo 6225", 3));
-    places.add(new SimplePlaceDetails(-1,"22fdgds55","Big Bang", "jdkdk dfgd 5", 0));
-    places.add(new SimplePlaceDetails(-1,"22fdgds55","Pizza", "jdkdk ,ld ssa 723", 0.5f));
+    viewPagerAdapter=new ViewPagerAdapter(getSupportFragmentManager(), (ViewPagerAdapter.FragmentItem[]) fragmentItems);
 
+    viewPager=(ViewPager) findViewById(R.id.ViewPager);
+    viewPager.setAdapter(viewPagerAdapter);
 
-    adapter.setPlaces(places);
+    TabLayout tabLayout = (TabLayout) findViewById(R.id.tl_tabs);
+    tabLayout.setupWithViewPager(viewPager);
     }
 
 
-    private void setViews()
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu)
     {
+    getMenuInflater().inflate( R.menu.menu_home_activity, menu);
 
-    adapter=new PlaceAdapter(this, R.layout.rv_place_item);
+    MenuItem myActionMenuItem = menu.findItem( R.id.m_search);
 
-    recyclerView=(ClickableRecyclerView) findViewById(R.id.RecyclerView);
-    recyclerView.setLayoutManager(new LinearLayoutManager(this));
-    recyclerView.setHasFixedSize(true);
-    recyclerView.setAdapter(adapter);
+    searchView = (SearchView) myActionMenuItem.getActionView();
+    searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener()
+        {
+            @Override
+            public boolean onQueryTextSubmit(String query)
+            {
+
+            Toast.makeText(HomeActivity.this, query, Toast.LENGTH_SHORT).show();
+
+            hideKeyboard();
+            viewPager.setCurrentItem(placesFragmentPosition,true);
+            return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s)
+            {
+            return false;
+            }
+        });
+
+    return true;
     }
 
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+    boolean isActionDone=true;
+
+    switch(item.getItemId())
+        {
+        case R.id.m_clear_history:
+        //TODO
+        break;
+
+        case R.id.m_setting:
+        //TODO
+        break;
+
+        default:
+        isActionDone=false;
+        }
+
+    return isActionDone;
+    }
+
+
+    private void hideKeyboard()
+    {
+    View view = getCurrentFocus();
+
+    if (view != null)
+        {
+        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
 }
