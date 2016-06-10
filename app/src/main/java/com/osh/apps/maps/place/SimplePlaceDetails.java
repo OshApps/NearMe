@@ -10,23 +10,26 @@ import com.osh.apps.maps.app.AppData;
 public class SimplePlaceDetails
 {
 private String googleId, name, address;
+private double lat, lng;
 private float rating;
 private long id;
 
 
-    public SimplePlaceDetails(String googleId, String name, String address, float rating)
+    public SimplePlaceDetails(String googleId, String name, String address, double lat, double lng, float rating)
     {
-    this(AppData.NULL_DATA, googleId, name, address, rating);
+    this(AppData.NULL_DATA, googleId, name, address, lat, lng, rating);
     }
 
 
-    public SimplePlaceDetails(long id, String googleId, String name, String address, float rating)
+    public SimplePlaceDetails(long id, String googleId, String name, String address, double lat, double lng, float rating)
     {
     this.id=id;
     this.googleId=googleId;
     this.name=name;
     this.address=address;
     this.rating=rating;
+    this.lat=lat;
+    this.lng=lng;
     }
 
 
