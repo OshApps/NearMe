@@ -15,6 +15,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import com.osh.apps.maps.R;
+import com.osh.apps.maps.service.SearchService;
 import com.osh.apps.maps.ViewPagerAdapter;
 import com.osh.apps.maps.fragment.FavoritesFragment;
 import com.osh.apps.maps.fragment.PlacesFragment;
@@ -28,7 +29,6 @@ private int placesFragmentPosition;
 private PlacesFragment placesFragment;
 private SearchView searchView;
 private ViewPager viewPager;
-
 
 
     @Override
@@ -88,6 +88,8 @@ private ViewPager viewPager;
 
             hideKeyboard();
             viewPager.setCurrentItem(placesFragmentPosition,true);
+            SearchService.startActionSearch(getBaseContext() , query);
+
             return true;
             }
 
