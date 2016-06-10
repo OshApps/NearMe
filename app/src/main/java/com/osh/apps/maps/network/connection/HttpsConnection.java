@@ -5,11 +5,13 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import javax.net.ssl.HttpsURLConnection;
+
 
 /**
  * Created by oshri-n on 24/05/2016.
  */
-public class HttpConnection
+public class HttpsConnection
 {
 private static final int DEFAULT_CONNECTION_TIMEOUT = 3000;
 
@@ -18,7 +20,7 @@ private static final int DEFAULT_CONNECTION_TIMEOUT = 3000;
     {
     URL url=new URL(webUrl);
 
-    HttpURLConnection connection= (HttpURLConnection) url.openConnection();
+    HttpsURLConnection connection= (HttpsURLConnection) url.openConnection();
     connection.setConnectTimeout(connectionTimeout);
     connection.setReadTimeout(connectionTimeout);
 

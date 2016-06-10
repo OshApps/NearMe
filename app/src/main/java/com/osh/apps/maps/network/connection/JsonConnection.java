@@ -11,13 +11,14 @@ public class JsonConnection
 {
 private static final int JSON_CONNECTION_TIMEOUT = 10000;
 
+
     public static String getJsonResult(String webURL) throws Exception
     {
     BufferedReader reader=null;
     String line,result=null;
 
     try {
-        reader = new BufferedReader(new InputStreamReader(HttpConnection.getInputStream(webURL, JSON_CONNECTION_TIMEOUT)));
+        reader = new BufferedReader(new InputStreamReader(HttpsConnection.getInputStream(webURL, JSON_CONNECTION_TIMEOUT)));
 
         result="";
 
@@ -28,6 +29,7 @@ private static final int JSON_CONNECTION_TIMEOUT = 10000;
 
         }catch(Exception e)
             {
+            e.printStackTrace();
             throw new Exception("Failed get json from '"+webURL+"'");
             }
 
