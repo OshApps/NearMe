@@ -12,21 +12,19 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Toast;
 
 import com.osh.apps.maps.R;
-import com.osh.apps.maps.service.SearchService;
-import com.osh.apps.maps.ViewPagerAdapter;
-import com.osh.apps.maps.fragment.FavoritesFragment;
-import com.osh.apps.maps.fragment.PlacesFragment;
+import com.osh.apps.maps.adapter.FragmentsAdapter;
+import com.osh.apps.maps.fragment.FavouritesFragment;
+import com.osh.apps.maps.fragment.SearchFragment;
 
 
 public class HomeActivity extends AppCompatActivity
 {
-private FavoritesFragment favoritesFragment;
-private ViewPagerAdapter viewPagerAdapter;
-private int placesFragmentPosition;
-private PlacesFragment placesFragment;
+private FavouritesFragment favouritesFragment;
+private FragmentsAdapter fragmentsAdapter;
+private SearchFragment searchFragment;
+private int searchFragmentPosition;
 private SearchView searchView;
 private ViewPager viewPager;
 
@@ -36,9 +34,28 @@ private ViewPager viewPager;
     {
     super.onCreate(savedInstanceState);
 
-    ViewPagerAdapter.FragmentItem[] fragmentItems;
-
     setContentView(R.layout.activity_home);
+
+    init();
+
+    setViews();
+    }
+
+
+    private void init()
+    {
+    searchFragment=SearchFragment.newInstance();
+    favouritesFragment=FavouritesFragment.newInstance();
+
+    fragmentsAdapter=new FragmentsAdapter( this , getSupportFragmentManager(), searchFragment, favouritesFragment );
+
+    searchFragmentPosition=fragmentsAdapter.getItemPosition(searchFragment);
+
+    }
+
+
+    private void setViews()
+    {
     Toolbar toolbar=(Toolbar) findViewById(R.id.toolbar);
     setSupportActionBar(toolbar);
 
@@ -48,22 +65,14 @@ private ViewPager viewPager;
             @Override
             public void onClick(View view)
             {
-            viewPager.setCurrentItem(placesFragmentPosition,true);
+            searchFragment.onSearch(null);
+
+            viewPager.setCurrentItem(searchFragmentPosition,true);
             }
         });
 
-    favoritesFragment=FavoritesFragment.newInstance();
-    placesFragment=PlacesFragment.newInstance();
-
-    fragmentItems=new ViewPagerAdapter.FragmentItem[]{new ViewPagerAdapter.FragmentItem( placesFragment, getString(R.string.places_tab) ),
-                                                      new ViewPagerAdapter.FragmentItem( favoritesFragment, getString(R.string.favorites_tab) )
-                                                      };
-    placesFragmentPosition=0;
-
-    viewPagerAdapter=new ViewPagerAdapter(getSupportFragmentManager(), (ViewPagerAdapter.FragmentItem[]) fragmentItems);
-
     viewPager=(ViewPager) findViewById(R.id.ViewPager);
-    viewPager.setAdapter(viewPagerAdapter);
+    viewPager.setAdapter(fragmentsAdapter);
 
     TabLayout tabLayout = (TabLayout) findViewById(R.id.tl_tabs);
     tabLayout.setupWithViewPager(viewPager);
@@ -83,21 +92,21 @@ private ViewPager viewPager;
             @Override
             public boolean onQueryTextSubmit(String query)
             {
-
-            Toast.makeText(HomeActivity.this, query, Toast.LENGTH_SHORT).show();
-
             hideKeyboard();
-            viewPager.setCurrentItem(placesFragmentPosition,true);
-            SearchService.startActionSearch(getBaseContext() , query);
 
+            searchFragment.onSearch(query);
+
+            viewPager.setCurrentItem(searchFragmentPosition, true);
             return true;
             }
+
 
             @Override
             public boolean onQueryTextChange(String s)
             {
             return false;
             }
+
         });
 
     return true;
