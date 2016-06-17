@@ -1,7 +1,6 @@
-package com.osh.apps.maps.clickableRecyclerView.adapter;
+package com.osh.apps.maps.adapter;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,7 +9,7 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.osh.apps.maps.R;
-import com.osh.apps.maps.place.SimplePlaceDetails;
+import com.osh.apps.maps.place.Place;
 
 import java.util.ArrayList;
 
@@ -18,9 +17,9 @@ import java.util.ArrayList;
 /**
  * Created by oshri-n on 16/05/2016.
  */
-public class PlaceAdapter extends RecyclerView.Adapter<PlaceAdapter.MovieHolder>
+public class PlaceAdapter extends RecyclerView.Adapter<PlaceAdapter.PlaceHolder>
 {
-private ArrayList<SimplePlaceDetails> places;
+private ArrayList<Place> places;
 private LayoutInflater inflater;
 private int layout;
 
@@ -36,59 +35,59 @@ private int layout;
 
 
     @Override
-    public MovieHolder onCreateViewHolder(ViewGroup parent, int viewType)
+    public PlaceHolder onCreateViewHolder(ViewGroup parent, int viewType)
     {
     View itemView;
 
     itemView=inflater.inflate(layout, null);
 
-    return new MovieHolder(itemView);
+    return new PlaceHolder(itemView);
     }
 
 
     @Override
-    public void onBindViewHolder(MovieHolder holder, int position)
+    public void onBindViewHolder(PlaceHolder holder, int position)
     {
     holder.bindPlaceDetails(places.get(position));
     }
 
 
-    public SimplePlaceDetails getItem(int position)
+    public Place getItem(int position)
     {
     return places.get(position);
     }
 
 
-    public void setPlaces(@NonNull ArrayList<SimplePlaceDetails> places)
+    public void setPlaces(ArrayList<Place> places)
     {
-    clearMovies();
-    addMovies(places);
+    clearPlaces();
+    addPlaces(places);
     }
 
 
-    public void addMovies(@NonNull ArrayList<SimplePlaceDetails> movies)
+    public void addPlaces(ArrayList<Place> places)
     {
     int lastItemPosition;
 
-    if(movies!=null)
+    if(places!=null)
         {
         lastItemPosition=this.places.size();
 
-        this.places.addAll(movies);
+        this.places.addAll(places);
 
-        notifyItemRangeInserted(lastItemPosition, movies.size());
+        notifyItemRangeInserted(lastItemPosition, places.size());
         }
     }
 
 
-    public void removeMovie(int positoin)
+    public void removePlace(int position)
     {
-    places.remove(positoin);
-    notifyItemRemoved(positoin);
+    places.remove(position);
+    notifyItemRemoved(position);
     }
 
 
-    public void clearMovies()
+    public void clearPlaces()
     {
     int size;
 
@@ -109,13 +108,19 @@ private int layout;
     }
 
 
-    public class MovieHolder extends RecyclerView.ViewHolder
+    public boolean isEmpty()
+    {
+    return places.isEmpty();
+    }
+
+
+    public class PlaceHolder extends RecyclerView.ViewHolder
     {
     private TextView name,address;
     private RatingBar rating;
 
 
-        public MovieHolder(View itemView)
+        public PlaceHolder(View itemView)
         {
         super(itemView);
 
@@ -126,7 +131,7 @@ private int layout;
         }
 
 
-        public void bindPlaceDetails(SimplePlaceDetails placeDetails)
+        public void bindPlaceDetails(Place placeDetails)
         {
         name.setText(placeDetails.getName());
         address.setText(placeDetails.getAddress());
