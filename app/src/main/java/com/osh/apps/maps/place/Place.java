@@ -7,7 +7,7 @@ import com.osh.apps.maps.app.AppData;
 /**
  * Created by oshri-n on 16/05/2016.
  */
-public class SimplePlaceDetails
+public class Place
 {
 private String googleId, name, address;
 private double lat, lng;
@@ -15,13 +15,7 @@ private float rating;
 private long id;
 
 
-    public SimplePlaceDetails(String googleId, String name, String address, double lat, double lng, float rating)
-    {
-    this(AppData.NULL_DATA, googleId, name, address, lat, lng, rating);
-    }
-
-
-    public SimplePlaceDetails(long id, String googleId, String name, String address, double lat, double lng, float rating)
+    public Place(long id, String googleId, String name, String address, double lat, double lng, float rating)
     {
     this.id=id;
     this.googleId=googleId;
@@ -63,12 +57,6 @@ private long id;
     }
 
 
-    public void setId(long id)
-    {
-    this.id = id;
-    }
-
-
     public void setName(String name)
     {
     this.name=name;
@@ -90,5 +78,17 @@ private long id;
     public boolean hasDatabaseID()
     {
     return id!=AppData.NULL_DATA;
+    }
+
+
+    public double getLat()
+    {
+    return lat;
+    }
+
+
+    public double getLng()
+    {
+    return lng;
     }
 }
