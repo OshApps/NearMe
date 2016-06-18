@@ -10,12 +10,13 @@ import com.osh.apps.maps.app.AppData;
 public class Place
 {
 private String googleId, name, address;
+private boolean isFavourite;
 private double lat, lng;
 private float rating;
 private long id;
 
 
-    public Place(long id, String googleId, String name, String address, double lat, double lng, float rating)
+    public Place(long id, String googleId, String name, String address, double lat, double lng, float rating, boolean isFavourite)
     {
     this.id=id;
     this.googleId=googleId;
@@ -24,6 +25,7 @@ private long id;
     this.rating=rating;
     this.lat=lat;
     this.lng=lng;
+    this.isFavourite=isFavourite;
     }
 
 
@@ -75,9 +77,9 @@ private long id;
     }
 
 
-    public boolean hasDatabaseID()
+    public void setFavourite(boolean favourite)
     {
-    return id!=AppData.NULL_DATA;
+    isFavourite=favourite;
     }
 
 
@@ -91,4 +93,19 @@ private long id;
     {
     return lng;
     }
+
+
+    public boolean hasDatabaseID()
+    {
+    return id!=AppData.NULL_DATA;
+    }
+
+
+    public boolean isFavourite()
+    {
+    return isFavourite;
+    }
+
+
+
 }

@@ -21,7 +21,7 @@ public class PlaceDetailsActivity extends AppCompatActivity
 {
 private static final String EXTRA_PLACE_NAME="placeName";
 private static final String EXTRA_PLACE_ID="placeId";
-private static final String EXTRA_PLACE_TYPE="placeType";
+
 
 private DetailsFragment detailsFragment;
 private TabFragment mapFragment;
@@ -30,12 +30,11 @@ private int mapFragmentPosition;
 private ViewPager viewPager;
 
 
-    public static void openActivity(Context context, String placeName, long placeId, int placeType)
+    public static void openActivity(Context context, String placeName, long placeId)
     {
     Intent intent=new Intent(context, PlaceDetailsActivity.class);
     intent.putExtra(EXTRA_PLACE_NAME, placeName);
     intent.putExtra(EXTRA_PLACE_ID, placeId);
-    intent.putExtra(EXTRA_PLACE_TYPE, placeType);
     context.startActivity(intent);
     }
 
@@ -57,7 +56,7 @@ private ViewPager viewPager;
     {
     Intent intent= getIntent();
 
-    detailsFragment=DetailsFragment.newInstance(intent.getLongExtra(EXTRA_PLACE_ID, AppData.NULL_DATA),intent.getIntExtra(EXTRA_PLACE_TYPE, AppData.NULL_DATA));
+    detailsFragment=DetailsFragment.newInstance(intent.getLongExtra(EXTRA_PLACE_ID, AppData.NULL_DATA));
 
     mapFragment=new TabFragment()
         {

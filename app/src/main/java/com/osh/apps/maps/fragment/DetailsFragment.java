@@ -28,7 +28,6 @@ public class DetailsFragment extends TabFragment
 private static final int TITLE_RES=R.string.details_tab;
 
 private static final String ARG_PLACE_ID="placeId";
-private static final String ARG_PLACE_TYPE="placeType";
 
 private TextView address,distance,phone,website;
 private DatabaseManager databaseManager;
@@ -45,7 +44,7 @@ private RatingBar rating;
     }
 
 
-    public static DetailsFragment newInstance(long placeId, int placeType)
+    public static DetailsFragment newInstance(long placeId)
     {
     DetailsFragment fragment;
     Bundle args;
@@ -53,7 +52,6 @@ private RatingBar rating;
     args=new Bundle();
 
     args.putLong(ARG_PLACE_ID, placeId);
-    args.putInt(ARG_PLACE_TYPE, placeType);
 
     fragment=new DetailsFragment();
     fragment.setArguments(args);
@@ -133,31 +131,19 @@ private RatingBar rating;
         String[] photoUrls;
         JSONArray photos;
         Bundle bundle;
-        int placeType;
         long placeId;
         Place place;
 
         bundle=getArguments();
 
         placeId=bundle.getLong(ARG_PLACE_ID, AppData.NULL_DATA);
-        placeType=bundle.getInt(ARG_PLACE_TYPE, AppData.NULL_DATA);
 
         placeDetails=null;
         place=null;
 
         if(placeId != AppData.NULL_DATA)
             {
-            switch(placeType)
-                {
-                case AppData.Place.FAVOURITE_TYPE:
-                place=databaseManager.getFavouritePlace(placeId);
-                break;
-
-                case AppData.Place.SEARCH_TYPE:
-                place=databaseManager.getSearchPlace(placeId);
-                break;
-                }
-
+            place=databaseManager.getPlace(placeId);
             }
 
         if(place!=null)

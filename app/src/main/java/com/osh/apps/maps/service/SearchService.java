@@ -101,7 +101,7 @@ public static final int STATUS_ERROR=2;
 
                 location=place.getJSONObject("geometry").getJSONObject("location");
 
-                databaseManager.insertPlaceSearch(place.getString("place_id"), place.getString("name"), place.getString("vicinity"), location.getDouble("lat"), location.getDouble("lng"), rating);
+                databaseManager.insertSearchPlace(place.getString("place_id"), place.getString("name"), place.getString("vicinity"), location.getDouble("lat"), location.getDouble("lng"), rating);
                 }
 
         jsonStatus= json.getString("status");

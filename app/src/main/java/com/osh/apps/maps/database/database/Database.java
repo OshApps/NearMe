@@ -24,24 +24,16 @@ public static final int DATABASE_VERSION=1;
 	@Override
 	public void onCreate(SQLiteDatabase db)
 	{
-    db.execSQL("CREATE TABLE "+Table.Places.Favourites.TABLE_NAME+"("+Table.Places.Favourites.COL_FAVORITE_ID+" INTEGER PRIMARY KEY, "+
-                                                              Table.Places.COL_GOOGLE_ID+" TEXT," +
-                                                              Table.Places.COL_NAME+" TEXT," +
-                                                              Table.Places.COL_ADDRESS+" TEXT," +
-                                                              Table.Places.COL_LAT+" DOUBLE," +
-                                                              Table.Places.COL_LNG+" DOUBLE," +
-                                                              Table.Places.COL_RATING+" FLOAT)" +
-                                                              ";");
-
-
-    db.execSQL("CREATE TABLE "+Table.Places.LastSearch.TABLE_NAME+"("+Table.Places.LastSearch.COL_SEARCH_ID+" INTEGER PRIMARY KEY, "+
-                                                              Table.Places.COL_GOOGLE_ID+" TEXT," +
-                                                              Table.Places.COL_NAME+" TEXT," +
-                                                              Table.Places.COL_ADDRESS+" TEXT," +
-                                                              Table.Places.COL_LAT+" DOUBLE," +
-                                                              Table.Places.COL_LNG+" DOUBLE," +
-                                                              Table.Places.COL_RATING+" FLOAT)" +
-                                                              ";");
+    db.execSQL("CREATE TABLE "+Table.Places.TABLE_NAME+"("+Table.Places.COL_PLACE_ID+" INTEGER PRIMARY KEY, "+
+                                                           Table.Places.COL_GOOGLE_ID+" TEXT," +
+                                                           Table.Places.COL_NAME+" TEXT," +
+                                                           Table.Places.COL_ADDRESS+" TEXT," +
+                                                           Table.Places.COL_LAT+" DOUBLE," +
+                                                           Table.Places.COL_LNG+" DOUBLE," +
+                                                           Table.Places.COL_RATING+" FLOAT," +
+                                                           Table.Places.COL_FAVOURITE+" INTEGER," +
+                                                           Table.Places.COL_SEARCH+" INTEGER)" +
+                                                           ";");
 	}
 
 
@@ -107,6 +99,7 @@ public static final int DATABASE_VERSION=1;
         if (!cursor.moveToFirst())
             {
             cursor.close();
+            db.close();
             cursor=null;
             }
 
@@ -118,6 +111,8 @@ public static final int DATABASE_VERSION=1;
                 {
                 cursor.close();
                 }
+
+            db.close();
             }
 
     return cursor;
@@ -135,37 +130,28 @@ public static final int DATABASE_VERSION=1;
         cursor.close();
         }
 
-
     return isExist;
 	}
 
 
     protected static final class Table
     {
+    public static final int TRUE=1;
+    public static final int FALSE=0;
+
 
         public static class Places
         {
+        public static final String TABLE_NAME="places";
+        public static final String COL_PLACE_ID="placeID";
         public static final String COL_GOOGLE_ID="googleID";
         public static final String COL_NAME="name";
         public static final String COL_ADDRESS="address";
         public static final String COL_LAT="lat";
         public static final String COL_LNG="lng";;
         public static final String COL_RATING="rating";
-
-
-            public static final class Favourites
-            {
-            public static final String TABLE_NAME="favourites";
-            public static final String COL_FAVORITE_ID="favouriteID";
-            }
-
-
-            public static final class LastSearch
-            {
-            public static final String TABLE_NAME="last_search";
-            public static final String COL_SEARCH_ID="searchID";
-            }
-
+        public static final String COL_FAVOURITE="isFavourite";
+        public static final String COL_SEARCH="isSearch";
         }
     }
 }
