@@ -8,8 +8,9 @@ import android.support.annotation.Nullable;
 
 public abstract class DatabaseSQL extends Database
 {
-private final String AND=" AND ";
-private final String OR=" OR ";
+public final String OPERATOR_AND=" AND ";
+public final String OPERATOR_OR=" OR ";
+
 
     public DatabaseSQL(Context context)
 	{
@@ -17,7 +18,7 @@ private final String OR=" OR ";
 	}
 
 
-	protected String addColStatement(String colName ,@Nullable String value, boolean isColStringType)
+	protected String addColStatement(@NonNull String colName ,@Nullable String value, boolean isColStringType)
 	{
 	String colStatement;
 	
@@ -37,6 +38,12 @@ private final String OR=" OR ";
 	colStatement= colName+"="+value;
 	
 	return colStatement;
+	}
+
+
+	protected String addColStatement(@NonNull String colName ,@Nullable String value, boolean isColStringType,@NonNull  String operator)
+	{
+	return operator+ addColStatement(colName, value, isColStringType);
 	}
 	
 	

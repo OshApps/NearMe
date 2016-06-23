@@ -13,13 +13,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
+import com.osh.apps.maps.HomeActivityCallback;
 import com.osh.apps.maps.R;
 import com.osh.apps.maps.adapter.FragmentsAdapter;
+import com.osh.apps.maps.app.AppData;
 import com.osh.apps.maps.fragment.FavouritesFragment;
 import com.osh.apps.maps.fragment.SearchFragment;
+import com.osh.apps.maps.place.Place;
 
 
-public class HomeActivity extends AppCompatActivity
+public class HomeActivity extends AppCompatActivity implements HomeActivityCallback
 {
 private FavouritesFragment favouritesFragment;
 private FragmentsAdapter fragmentsAdapter;
@@ -27,6 +30,7 @@ private SearchFragment searchFragment;
 private int searchFragmentPosition;
 private SearchView searchView;
 private ViewPager viewPager;
+private long lastPlaceId;
 
 
     @Override
@@ -46,6 +50,8 @@ private ViewPager viewPager;
     {
     searchFragment=SearchFragment.newInstance();
     favouritesFragment=FavouritesFragment.newInstance();
+
+    lastPlaceId=AppData.NULL_DATA;
 
     fragmentsAdapter=new FragmentsAdapter( this , getSupportFragmentManager(), searchFragment, favouritesFragment );
 
@@ -136,6 +142,23 @@ private ViewPager viewPager;
     }
 
 
+    @Override
+    protected void onResume()
+    {
+    super.onResume();
+
+
+    if(lastPlaceId != AppData.NULL_DATA)
+        {
+        favouritesFragment.onPlaceChanged(lastPlaceId);
+        searchFragment.onPlaceChanged(lastPlaceId);
+
+        lastPlaceId=AppData.NULL_DATA;
+        }
+
+    }
+
+
     private void hideKeyboard()
     {
     View view = getCurrentFocus();
@@ -146,4 +169,34 @@ private ViewPager viewPager;
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
     }
+
+
+    @Override
+    public void openPlaceDetailsActivity(long placeId, String name)
+    {
+    lastPlaceId=placeId;
+
+    PlaceDetailsActivity.openActivity(this, placeId, name);
+    }
+
+
+    @Override
+    public void onRemoveFavouritePlace(int fragmentId, long placeId)
+    {
+    if(fragmentId == FavouritesFragment.FRAGMENT_ID)
+        {
+        searchFragment.onFavouritePlaceRemoved(placeId);
+        }else if(fragmentId == SearchFragment.FRAGMENT_ID)
+            {
+            favouritesFragment.onFavouritePlaceRemoved(placeId);
+            }
+    }
+
+
+    @Override
+    public void onAddFavouritePlace(Place place)
+    {
+    favouritesFragment.onFavouritePlaceAdded(place);
+    }
+
 }

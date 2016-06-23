@@ -15,7 +15,14 @@
 
 
     <string name="places_api_key">AIzaSyC5I_AJm7WkW3TXMu3XvLWIn7EvA8Asr2c</string>
+    <string name="open">Open</string>
+    <string name="delete">Delete</string>
+    <string name="add_favourites">Add To Favourites</string>
+    <string name="remove_favourites">Remove From Favourites</string>
+    <string name="favourite_toggle"> Favourite Toggle</string>
 
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 
 </resources>

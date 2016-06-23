@@ -5,10 +5,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RatingBar;
-import android.widget.TextView;
 
-import com.osh.apps.maps.R;
+import com.osh.apps.maps.app.AppData;
 import com.osh.apps.maps.place.Place;
 
 import java.util.ArrayList;
@@ -17,7 +15,7 @@ import java.util.ArrayList;
 /**
  * Created by oshri-n on 16/05/2016.
  */
-public class PlaceAdapter extends RecyclerView.Adapter<PlaceAdapter.PlaceHolder>
+public class PlaceAdapter extends RecyclerView.Adapter<PlaceHolder>
 {
 private ArrayList<Place> places;
 private LayoutInflater inflater;
@@ -37,24 +35,89 @@ private int layout;
     @Override
     public PlaceHolder onCreateViewHolder(ViewGroup parent, int viewType)
     {
+    PlaceHolder viewHolder;
     View itemView;
 
     itemView=inflater.inflate(layout, null);
 
-    return new PlaceHolder(itemView);
+    if(layout == SearchPlaceHolder.LAYOUT_RES)
+        {
+        viewHolder= new SearchPlaceHolder(itemView);
+        }else
+            {
+            viewHolder= new PlaceHolder(itemView);
+            }
+
+    return viewHolder;
     }
 
 
     @Override
     public void onBindViewHolder(PlaceHolder holder, int position)
     {
-    holder.bindPlaceDetails(places.get(position));
+    holder.bindPlace(places.get(position));
+    }
+
+
+    public int getItemPosition(long placeId)
+    {
+    int position=AppData.NULL_DATA;
+
+    for(int i=0; i < places.size() ; i++)
+        {
+        if(places.get(i).getId()==placeId)
+            {
+            position=i;
+            break;
+            }
+        }
+
+    return position;
     }
 
 
     public Place getItem(int position)
     {
-    return places.get(position);
+    Place place=null;
+
+    if(position >= 0 && position < places.size())
+        {
+        place=places.get(position);
+        }
+
+    return place;
+    }
+
+
+    public Place getItem(long placeId)
+    {
+    Place placeItem=null;
+
+    for(Place place: places)
+        {
+
+        if(place.getId() == placeId)
+            {
+            placeItem=place;
+            break;
+            }
+        }
+
+    return placeItem;
+    }
+
+
+    @Override
+    public long getItemId(int position)
+    {
+    long placeId=AppData.NULL_DATA;
+
+    if(position >= 0 && position < places.size())
+        {
+        placeId=places.get(position).getId();
+        }
+
+    return placeId;
     }
 
 
@@ -80,10 +143,32 @@ private int layout;
     }
 
 
+    public void addPlace(Place place)
+    {
+
+    if(place!=null)
+        {
+        places.add(place);
+
+        notifyItemInserted(places.size()-1);
+        }
+    }
+
+
+    public void removePlace(long placeId)
+    {
+    removePlace(getItemPosition(placeId));
+    }
+
+
     public void removePlace(int position)
     {
-    places.remove(position);
-    notifyItemRemoved(position);
+
+    if(position >= 0 && position < places.size())
+        {
+        places.remove(position);
+        notifyItemRemoved(position);
+        }
     }
 
 
@@ -114,30 +199,5 @@ private int layout;
     }
 
 
-    public class PlaceHolder extends RecyclerView.ViewHolder
-    {
-    private TextView name,address;
-    private RatingBar rating;
 
-
-        public PlaceHolder(View itemView)
-        {
-        super(itemView);
-
-        name=(TextView) itemView.findViewById(R.id.tv_name);
-        address=(TextView) itemView.findViewById(R.id.tv_address);
-
-        rating=(RatingBar) itemView.findViewById(R.id.rb_rating);
-        }
-
-
-        public void bindPlaceDetails(Place placeDetails)
-        {
-        name.setText(placeDetails.getName());
-        address.setText(placeDetails.getAddress());
-
-        rating.setRating(placeDetails.getRating());
-        }
-
-    }
 }

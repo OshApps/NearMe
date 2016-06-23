@@ -8,13 +8,6 @@ public final class AppData
 public static final int NULL_DATA=-1;
 
 
-    public static final class Place
-    {
-    public static final int SEARCH_TYPE=0;
-    public static final int FAVOURITE_TYPE=1;
-    }
-
-
 	public static final class PlacesAPI
     {
     private static final String BASE_URL="https://maps.googleapis.com/maps/api/place/";

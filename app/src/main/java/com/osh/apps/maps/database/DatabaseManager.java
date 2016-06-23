@@ -14,7 +14,8 @@ import java.util.ArrayList;
 
 public class DatabaseManager extends DatabaseSQL
 {
-private static DatabaseManager instance;
+
+    private static DatabaseManager instance;
 
     public synchronized static DatabaseManager getInstance(Context context)
     {
@@ -37,24 +38,36 @@ private static DatabaseManager instance;
     public void insertSearchPlace(String googleId, String name, String address, double lat, double lng, float rating)
     {
     ContentValues values;
+    boolean isExist;
 
-    try {
-        values=new ContentValues();
-        values.put(Table.Places.COL_GOOGLE_ID, googleId);
-        values.put(Table.Places.COL_NAME, name);
-        values.put(Table.Places.COL_ADDRESS, address);
-        values.put(Table.Places.COL_LAT, lat);
-        values.put(Table.Places.COL_LNG, lng);
-        values.put(Table.Places.COL_RATING, rating);
-        values.put(Table.Places.COL_FAVOURITE, Table.FALSE);
-        values.put(Table.Places.COL_SEARCH, Table.TRUE);
+    isExist= isExist(Table.Places.TABLE_NAME, addColStatement(Table.Places.COL_GOOGLE_ID, googleId, true));
 
-        insert(Table.Places.TABLE_NAME, values);
-        }catch (SQLException e)
+    if(!isExist)
+        {
+        try {
+            values=new ContentValues();
+            values.put(Table.Places.COL_GOOGLE_ID, googleId);
+            values.put(Table.Places.COL_NAME, name);
+            values.put(Table.Places.COL_ADDRESS, address);
+            values.put(Table.Places.COL_LAT, lat);
+            values.put(Table.Places.COL_LNG, lng);
+            values.put(Table.Places.COL_RATING, rating);
+            values.put(Table.Places.COL_FAVOURITE, Table.FALSE);
+            values.put(Table.Places.COL_SEARCH, Table.TRUE);
+
+            insert(Table.Places.TABLE_NAME, values);
+            }catch (SQLException e)
+                {
+                Log.e("DatabaseManager","Error: Failed to insert place into places table");
+                e.printStackTrace();
+                }
+        }else
             {
-            Log.e("DatabaseManager","Error: Failed to insert place into places table");
-            e.printStackTrace();
+            updateFromTable(Table.Places.TABLE_NAME, addColStatement(Table.Places.COL_SEARCH, String.valueOf(Table.TRUE), true),
+                                                     addColStatement(Table.Places.COL_GOOGLE_ID, googleId, true));
+
             }
+
     }
 
 
@@ -68,7 +81,11 @@ private static DatabaseManager instance;
 
         updateFromTable(Table.Places.TABLE_NAME, updateCols, whereCols);
 
-        //TODO delete if is no favourite or search
+        if(!isFavourite)
+            {
+            deleteFromTable(Table.Places.TABLE_NAME, addColStatement(Table.Places.COL_PLACE_ID, String.valueOf(placeId), false) + addColStatement(Table.Places.COL_SEARCH, String.valueOf(Table.FALSE), false, OPERATOR_AND));
+            }
+
         }catch (SQLException e)
             {
             Log.e("DatabaseManager","Error: Failed to update place");
@@ -163,7 +180,7 @@ private static DatabaseManager instance;
 
     public void removeLastSearch()
     {
-    deleteFromTable(Table.Places.TABLE_NAME, addColStatement(Table.Places.COL_SEARCH, String.valueOf(Table.TRUE), false));
+    deleteFromTable(Table.Places.TABLE_NAME, addColStatement(Table.Places.COL_FAVOURITE, String.valueOf(Table.FALSE), false));
     }
 
 
@@ -191,4 +208,10 @@ private static DatabaseManager instance;
     return place;
     }
 
+
+    public boolean isFavouritePlace(long placeId)
+    {
+    return isExist(Table.Places.TABLE_NAME, addColStatement(Table.Places.COL_PLACE_ID, String.valueOf(placeId), false)+
+                                            addColStatement(Table.Places.COL_FAVOURITE, String.valueOf(Table.TRUE), false, OPERATOR_AND));
+    }
 }

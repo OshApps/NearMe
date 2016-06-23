@@ -1,5 +1,6 @@
 package com.osh.apps.maps.fragment;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
@@ -94,6 +95,31 @@ private RatingBar rating;
     new PlaceDetailsTask().execute();
 
     return view;
+    }
+
+
+    @Override
+    public void onAttach(Context context)
+    {
+    super.onAttach(context);
+/*
+    if(context instanceof CallBack)
+        {
+        favouriteChangeListener=(CallBack) context;
+        }else
+            {
+            throw new RuntimeException(context.toString()+" must implement CallBack");
+            }
+            */
+    }
+
+
+    @Override
+    public void onDetach()
+    {
+    super.onDetach();
+
+    //favouriteChangeListener=null;
     }
 
 
@@ -211,8 +237,6 @@ private RatingBar rating;
             phone.setText(placeDetails.getPhone());
 
             website.setText(placeDetails.getWebsite());
-
-
             }
 
 
@@ -222,4 +246,11 @@ private RatingBar rating;
         }
     }
 
+
+    public static interface ActivityCallBack
+    {
+
+    void showMap();
+
+    }
 }
