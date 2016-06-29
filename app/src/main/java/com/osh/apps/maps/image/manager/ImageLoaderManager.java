@@ -1,12 +1,12 @@
-package com.osh.apps.maps.image;
+package com.osh.apps.maps.image.manager;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.util.Log;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
 
+import com.osh.apps.maps.image.data.ImageData;
+import com.osh.apps.maps.image.request.ImageRequest;
 import com.osh.apps.maps.network.connection.HttpsConnection;
 
 import java.io.IOException;
@@ -42,15 +42,13 @@ private static Runnable action;
     }
 
 
-    public static void loadImage(ImageData image, ImageView imageView, ProgressBar loading)
+    public static ImageRequest loadImage(ImageData image, int width, int height)
     {
-    loadImage(image,imageView, loading, imageView.getWidth(), imageView.getHeight());
-    }
+    ImageRequest request=new ImageRequest(image, width, height);
 
+    addRequest(request);
 
-    public static void loadImage(ImageData image, ImageView imageView, ProgressBar loading, int width, int height)
-    {
-    addRequest(new ImageRequest(image, imageView, loading, width, height));
+    return request;
     }
 
 
@@ -62,9 +60,9 @@ private static Runnable action;
         init();
         }
 
-    if(!request.isDone())
+    if(!request.isRequested())
         {
-        request.preLoad();
+        request.onRequested();
         requests.add(request);
 
         if(!isRunning)
@@ -85,11 +83,6 @@ private static Runnable action;
     while(!requests.isEmpty())
         {
         request=requests.remove(0);
-
-        if(request.isDone())
-            {
-            continue;
-            }
 
         url=request.getUrl();
         bitmap=null;
@@ -112,7 +105,7 @@ private static Runnable action;
 
     private static void postResult(final ImageRequest request, final Bitmap bitmap)
     {
-    Log.d("ImageLoaderManager","post image");
+    //Log.d("ImageLoaderManager","post image");
     handler.post(new Runnable()
         {
 
@@ -134,20 +127,25 @@ private static Runnable action;
     try {
         inputStream= HttpsConnection.getInputStream(url);
 
-        bitmapOptions=getBitmapOptions(inputStream, width ,height);
+        bitmapOptions=null;
 
-        inputStream=HttpsConnection.getInputStream(url);
+        if(width > 0 || height > 0)
+            {
+            bitmapOptions=getBitmapOptions(inputStream, width ,height);
+
+            inputStream=HttpsConnection.getInputStream(url);
+            }
 
         bitmap= BitmapFactory.decodeStream(inputStream, null ,bitmapOptions);
 
-        if(bitmap!=null)
+        if(bitmap!=null && width > 0 && height > 0)
             {
             bitmap=Bitmap.createScaledBitmap(bitmap, width, height, true);
             }
 
         } catch (Exception e)
             {
-            Log.e("ImageLoaderManager",""+e.getMessage());
+            Log.e("ImageLoaderManager","Failed to load image - "+e.getMessage());
             }
 
     finally
@@ -192,7 +190,11 @@ private static Runnable action;
     {
     options.inJustDecodeBounds = false;
 
-    options.inSampleSize = Math.min(options.outWidth / width, options.outHeight / height);
+    width= (width > 0)? options.outWidth / width: options.outWidth;
+
+    height=(height > 0)? options.outHeight / height: options.outHeight;
+
+    options.inSampleSize = Math.min(width, height);
     }
 
 }
