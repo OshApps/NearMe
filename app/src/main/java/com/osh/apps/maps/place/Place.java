@@ -1,7 +1,10 @@
 package com.osh.apps.maps.place;
 
 
+import android.location.Location;
+
 import com.osh.apps.maps.app.AppData;
+import com.osh.apps.maps.image.data.ImageDataBind;
 
 
 /**
@@ -9,14 +12,16 @@ import com.osh.apps.maps.app.AppData;
  */
 public class Place
 {
-private String googleId, name, address;
+private String googleId,name,address,phone,website;
+private ImageDataBind iconImage;
 private boolean isFavourite;
 private double lat, lng;
+private int distance;
 private float rating;
 private long id;
 
 
-    public Place(long id, String googleId, String name, String address, double lat, double lng, float rating, boolean isFavourite)
+    public Place(long id, String googleId, String name, String address, double lat, double lng, float rating, String iconUrl, String phone, String website, boolean isFavourite)
     {
     this.id=id;
     this.googleId=googleId;
@@ -26,6 +31,52 @@ private long id;
     this.lat=lat;
     this.lng=lng;
     this.isFavourite=isFavourite;
+    this.phone=phone;
+    this.website=website;
+
+    distance=AppData.NULL_DATA;
+
+    iconImage=new ImageDataBind(iconUrl);
+    }
+
+
+    public void updateDistance(double lat, double lng)
+    {
+    float[] distance=new float[1];;
+
+    Location.distanceBetween(lat, lng, this.lat, this.lng, distance);
+
+    this.distance= (int) distance[0];
+    }
+
+
+    public void removeIconImage()
+    {
+    iconImage.remove();
+    }
+
+
+    public String getPhone()
+    {
+    return phone;
+    }
+
+
+    public ImageDataBind getIconImage()
+    {
+    return iconImage;
+    }
+
+
+    public String getWebsite()
+    {
+    return website;
+    }
+
+
+    public int getDistance()
+    {
+    return distance;
     }
 
 
@@ -59,30 +110,6 @@ private long id;
     }
 
 
-    public void setName(String name)
-    {
-    this.name=name;
-    }
-
-
-    public void setAddress(String address)
-    {
-    this.address=address;
-    }
-
-
-    public void setRating(float rating)
-    {
-    this.rating = rating;
-    }
-
-
-    public void setFavourite(boolean favourite)
-    {
-    isFavourite=favourite;
-    }
-
-
     public double getLat()
     {
     return lat;
@@ -95,9 +122,9 @@ private long id;
     }
 
 
-    public boolean hasDatabaseID()
+    public void setFavourite(boolean favourite)
     {
-    return id!=AppData.NULL_DATA;
+    isFavourite=favourite;
     }
 
 
@@ -105,7 +132,6 @@ private long id;
     {
     return isFavourite;
     }
-
 
 
 }

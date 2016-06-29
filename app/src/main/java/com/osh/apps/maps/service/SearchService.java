@@ -26,7 +26,8 @@ public static final String EXTRA_STATUS="status";
 
 public static final int STATUS_OK=0;
 public static final int STATUS_ZERO_RESULTS=1;
-public static final int STATUS_ERROR=2;
+public static final int STATUS_OVER_QUERY_LIMIT=2;
+public static final int STATUS_ERROR=3;
 
 
 
@@ -67,10 +68,10 @@ public static final int STATUS_ERROR=2;
 
     private void handleActionSearch(String keyword, double lat, double lng)
     {
+    JSONObject json,place,location,placeDetails,jsonPlaceDetails;
+    String apiKey,url,jsonStatus,placeId,phone,website,iconUrl;
     DatabaseManager databaseManager;
-    JSONObject json, place, location;
     JSONArray results;
-    String url,jsonStatus;
     Intent intent;
     float rating;
     int status;
@@ -81,27 +82,58 @@ public static final int STATUS_ERROR=2;
     databaseManager.removeLastSearch();
 
     status=STATUS_ERROR;
-    //https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=32.0601678,34.7848986&radius=500&keyword=coffee&key=AIzaSyC5I_AJm7WkW3TXMu3XvLWIn7EvA8Asr2c
 
-    url=AppData.PlacesAPI.createSearchUrl(keyword, lat , lng, 1000, getString(R.string.places_api_key)); //TODO get radius from SharedPreferences
+    apiKey=getString(R.string.places_api_key);
+
+    url=AppData.PlacesAPI.createSearchUrl(keyword, lat , lng, AppData.Preferences.getRadius(this), apiKey);
 
     try {
         json=new JSONObject(JsonConnection.getJsonResult(url));
         results=json.getJSONArray("results");
 
-        for(int i=0 ; i<results.length() ; i++)
+        for(int i=0 ; i < results.length() ; i++)
                 {
                 place=results.getJSONObject(i);
 
+                placeId=place.getString("place_id");
+
+                jsonPlaceDetails=new JSONObject( JsonConnection.getJsonResult( AppData.PlacesAPI.createDetailsUrl( placeId, apiKey ) ) );
+
+                placeDetails=null;
+
+                try {
+                    placeDetails=jsonPlaceDetails.getJSONObject("result");
+                    }catch(Exception e)
+                        {
+                        jsonStatus= json.getString("status");
+
+                        if(jsonStatus.equals("OVER_QUERY_LIMIT"))
+                            {
+                            status=STATUS_OVER_QUERY_LIMIT;
+                            }
+
+                        throw e;
+                        }
+
+                phone=null;
+                website=null;
                 rating=0;
+
+                try{
+                   phone=placeDetails.getString("international_phone_number");
+                   }catch(Exception e){}
+
+                try{
+                   website=placeDetails.getString("website");
+                   }catch(Exception e){}
 
                 try {
                     rating=(float) place.getDouble("rating");
                     }catch(Exception e){}
 
-                location=place.getJSONObject("geometry").getJSONObject("location");
+                location=placeDetails.getJSONObject("geometry").getJSONObject("location");
 
-                databaseManager.insertSearchPlace(place.getString("place_id"), place.getString("name"), place.getString("vicinity"), location.getDouble("lat"), location.getDouble("lng"), rating);
+                databaseManager.insertSearchPlace(placeId, placeDetails.getString("name"), placeDetails.getString("vicinity"), location.getDouble("lat"), location.getDouble("lng"), rating, placeDetails.getString("icon"), phone, website);
                 }
 
         jsonStatus= json.getString("status");
@@ -112,7 +144,10 @@ public static final int STATUS_ERROR=2;
             }else if(jsonStatus.equals("ZERO_RESULTS"))
                 {
                 status=STATUS_ZERO_RESULTS;
-                }
+                }else if(jsonStatus.equals("OVER_QUERY_LIMIT"))
+                    {
+                    status=STATUS_OVER_QUERY_LIMIT;
+                    }
 
         }catch(Exception e)
             {

@@ -31,6 +31,9 @@ public static final int DATABASE_VERSION=1;
                                                            Table.Places.COL_LAT+" DOUBLE," +
                                                            Table.Places.COL_LNG+" DOUBLE," +
                                                            Table.Places.COL_RATING+" FLOAT," +
+                                                           Table.Places.COL_ICON_URL+" TEXT," +
+                                                           Table.Places.COL_PHONE+" TEXT," +
+                                                           Table.Places.COL_WEBSITE+" TEXT," +
                                                            Table.Places.COL_FAVOURITE+" INTEGER," +
                                                            Table.Places.COL_SEARCH+" INTEGER)" +
                                                            ";");
@@ -143,15 +146,18 @@ public static final int DATABASE_VERSION=1;
         public static class Places
         {
         public static final String TABLE_NAME="places";
-        public static final String COL_PLACE_ID="placeID";
-        public static final String COL_GOOGLE_ID="googleID";
+        public static final String COL_PLACE_ID="place_id";
+        public static final String COL_GOOGLE_ID="google_id";
         public static final String COL_NAME="name";
         public static final String COL_ADDRESS="address";
         public static final String COL_LAT="lat";
         public static final String COL_LNG="lng";;
         public static final String COL_RATING="rating";
-        public static final String COL_FAVOURITE="isFavourite";
-        public static final String COL_SEARCH="isSearch";
+        public static final String COL_ICON_URL="icon_url";
+        public static final String COL_PHONE="phone";
+        public static final String COL_WEBSITE="website";
+        public static final String COL_FAVOURITE="favourite";
+        public static final String COL_SEARCH="search";
         }
     }
 }

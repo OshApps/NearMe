@@ -14,8 +14,8 @@ import java.util.ArrayList;
 
 public class DatabaseManager extends DatabaseSQL
 {
+private static DatabaseManager instance;
 
-    private static DatabaseManager instance;
 
     public synchronized static DatabaseManager getInstance(Context context)
     {
@@ -35,7 +35,7 @@ public class DatabaseManager extends DatabaseSQL
     }
 
 
-    public void insertSearchPlace(String googleId, String name, String address, double lat, double lng, float rating)
+    public void insertSearchPlace(String googleId, String name, String address, double lat, double lng, float rating, String iconUrl, String phone, String website)
     {
     ContentValues values;
     boolean isExist;
@@ -52,6 +52,9 @@ public class DatabaseManager extends DatabaseSQL
             values.put(Table.Places.COL_LAT, lat);
             values.put(Table.Places.COL_LNG, lng);
             values.put(Table.Places.COL_RATING, rating);
+            values.put(Table.Places.COL_ICON_URL, iconUrl);
+            values.put(Table.Places.COL_PHONE, phone);
+            values.put(Table.Places.COL_WEBSITE, website);
             values.put(Table.Places.COL_FAVOURITE, Table.FALSE);
             values.put(Table.Places.COL_SEARCH, Table.TRUE);
 
@@ -67,7 +70,6 @@ public class DatabaseManager extends DatabaseSQL
                                                      addColStatement(Table.Places.COL_GOOGLE_ID, googleId, true));
 
             }
-
     }
 
 
@@ -94,13 +96,19 @@ public class DatabaseManager extends DatabaseSQL
     }
 
 
-    public ArrayList<Place> getFavouritePlaces()
+    /**
+     * where col name = TRUE
+     *
+     * @param whereColName COL_FAVOURITE or  COL_SEARCH
+     *
+    */
+    public ArrayList<Place> getPlaces(String whereColName)
     {
-    int placeIdIndex,googleIdIndex,nameIndex,addressIndex,latIndex,lngIndex,ratingIndex;
+    int placeIdIndex,googleIdIndex,nameIndex,addressIndex,latIndex,lngIndex,ratingIndex,iconUrlIndex,phoneIndex,websiteIndex,isFavouriteIndex;
     ArrayList<Place> places=null;
     Cursor cursor;
 
-    cursor=selectFromTable(Table.Places.TABLE_NAME, null, addColStatement(Table.Places.COL_FAVOURITE, String.valueOf(Table.TRUE), false));
+    cursor=selectFromTable(Table.Places.TABLE_NAME, null, addColStatement(whereColName, String.valueOf(Table.TRUE), false));
 
 	if(cursor!=null)
         {
@@ -113,6 +121,10 @@ public class DatabaseManager extends DatabaseSQL
         latIndex=cursor.getColumnIndex(Table.Places.COL_LAT);
         lngIndex=cursor.getColumnIndex(Table.Places.COL_LNG);
         ratingIndex=cursor.getColumnIndex(Table.Places.COL_RATING);
+        iconUrlIndex=cursor.getColumnIndex(Table.Places.COL_ICON_URL);
+        phoneIndex=cursor.getColumnIndex(Table.Places.COL_PHONE);
+        websiteIndex=cursor.getColumnIndex(Table.Places.COL_WEBSITE);
+        isFavouriteIndex=cursor.getColumnIndex(Table.Places.COL_FAVOURITE);
 
         do{
 
@@ -123,7 +135,10 @@ public class DatabaseManager extends DatabaseSQL
                                cursor.getDouble(latIndex),
                                cursor.getDouble(lngIndex),
                                cursor.getFloat(ratingIndex),
-                               true
+                               cursor.getString(iconUrlIndex),
+                               cursor.getString(phoneIndex),
+                               cursor.getString(websiteIndex),
+                               cursor.getInt(isFavouriteIndex) == Table.TRUE
                                ));
 
           }while(cursor.moveToNext());
@@ -135,51 +150,21 @@ public class DatabaseManager extends DatabaseSQL
     }
 
 
+    public ArrayList<Place> getFavouritePlaces()
+    {
+    return getPlaces(Table.Places.COL_FAVOURITE);
+    }
+
+
     public ArrayList<Place> getLastSearch()
     {
-    int placeIdIndex,googleIdIndex,nameIndex,addressIndex,latIndex,lngIndex,ratingIndex,isFavouriteIndex;
-    ArrayList<Place> places=null;
-    Cursor cursor;
-
-    cursor=selectFromTable(Table.Places.TABLE_NAME, null, addColStatement(Table.Places.COL_SEARCH, String.valueOf(Table.TRUE), false));
-
-	if(cursor!=null)
-        {
-        places=new ArrayList<>();
-
-        placeIdIndex=cursor.getColumnIndex(Table.Places.COL_PLACE_ID);
-        googleIdIndex=cursor.getColumnIndex(Table.Places.COL_GOOGLE_ID);
-        nameIndex=cursor.getColumnIndex(Table.Places.COL_NAME);
-        addressIndex=cursor.getColumnIndex(Table.Places.COL_ADDRESS);
-        latIndex=cursor.getColumnIndex(Table.Places.COL_LAT);
-        lngIndex=cursor.getColumnIndex(Table.Places.COL_LNG);
-        ratingIndex=cursor.getColumnIndex(Table.Places.COL_RATING);
-        isFavouriteIndex=cursor.getColumnIndex(Table.Places.COL_FAVOURITE);
-
-
-        do{
-
-          places.add(new Place(cursor.getLong(placeIdIndex),
-                        cursor.getString(googleIdIndex),
-                        cursor.getString(nameIndex),
-                        cursor.getString(addressIndex),
-                        cursor.getDouble(latIndex),
-                        cursor.getDouble(lngIndex),
-                        cursor.getFloat(ratingIndex),
-                        cursor.getInt(isFavouriteIndex) == Table.TRUE
-                        ));
-
-          }while(cursor.moveToNext());
-
-        cursor.close();
-        }
-
-    return places;
+    return getPlaces(Table.Places.COL_SEARCH);
     }
 
 
     public void removeLastSearch()
     {
+    updateFromTable(Table.Places.TABLE_NAME, addColStatement(Table.Places.COL_SEARCH, String.valueOf(Table.FALSE), false) , null);
     deleteFromTable(Table.Places.TABLE_NAME, addColStatement(Table.Places.COL_FAVOURITE, String.valueOf(Table.FALSE), false));
     }
 
@@ -200,6 +185,9 @@ public class DatabaseManager extends DatabaseSQL
                         cursor.getDouble(cursor.getColumnIndex(Table.Places.COL_LAT)),
                         cursor.getDouble(cursor.getColumnIndex(Table.Places.COL_LNG)),
                         cursor.getFloat(cursor.getColumnIndex(Table.Places.COL_RATING)),
+                        cursor.getString(cursor.getColumnIndex(Table.Places.COL_ICON_URL)),
+                        cursor.getString(cursor.getColumnIndex(Table.Places.COL_PHONE)),
+                        cursor.getString(cursor.getColumnIndex(Table.Places.COL_WEBSITE)),
                         cursor.getInt(cursor.getColumnIndex(Table.Places.COL_FAVOURITE))== Table.TRUE
                         );
         }
