@@ -1,11 +1,75 @@
 package com.osh.apps.maps.app;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+
+import com.osh.apps.maps.R;
+
+
 /**
  * Created by oshri-n on 16/05/2016.
  */
 public final class AppData
 {
 public static final int NULL_DATA=-1;
+
+
+    public static final class Preferences
+    {
+    public static final String SHARED_PREFERENCES_NAME="preferences";
+
+    public static final String KEY_DISTANCE_TYPE="distance_type";
+    public static final String KEY_RADIUS="radius";
+
+    private static final int KM_TYPE=1;
+    private static final int MIL_TYPE=2;
+
+    public static final int DEFAULT_RADIUS=500;
+    public static final int DEFAULT_DISTANCE_TYPE=KM_TYPE;
+
+    private static final float KILOMETER=1000;
+    private static final float MIL=1609.344f;
+
+
+        public static int getRadius(Context context)
+        {
+        SharedPreferences sharedPreferences;
+
+        sharedPreferences=context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+
+        return sharedPreferences.getInt(KEY_RADIUS, DEFAULT_RADIUS);
+        }
+
+
+        public static String getDistanceText(Context context, int distance)
+        {
+        SharedPreferences sharedPreferences;
+        String distanceText;
+        float distanceResult;
+        int distanceType;
+
+        sharedPreferences=context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+
+        distanceType= sharedPreferences.getInt(KEY_DISTANCE_TYPE, DEFAULT_DISTANCE_TYPE);
+
+        switch(distanceType)
+            {
+            case MIL_TYPE:
+            distanceText=context.getString(R.string.distance_mil);
+            distanceResult= distance / MIL;
+            break;
+
+            case KM_TYPE:
+            default:
+            distanceText=context.getString(R.string.distance_km);
+            distanceResult= distance / KILOMETER;
+            break;
+
+            }
+
+        return String.format(distanceText, distanceResult);
+        }
+    }
 
 
 	public static final class PlacesAPI
@@ -50,6 +114,7 @@ public static final int NULL_DATA=-1;
 
         url+=KEY_PARAMETER + apiKey;
 
+        //Log.d("AppData-PlacesAPI","url= "+ url);
         return url;
         }
 
