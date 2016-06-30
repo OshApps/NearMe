@@ -2,6 +2,7 @@ package com.osh.apps.maps.adapter;
 
 import android.content.Context;
 import android.support.v4.view.PagerAdapter;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,8 +10,8 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import com.osh.apps.maps.R;
-import com.osh.apps.maps.image.ImageData;
-import com.osh.apps.maps.image.ImageLoaderManager;
+import com.osh.apps.maps.image.data.ImageData;
+import com.osh.apps.maps.image.listener.OnLoadListener;
 
 
 /**
@@ -20,6 +21,7 @@ public class PhotosAdapter extends PagerAdapter
 {
 private LayoutInflater inflater;
 private ImageData[] images;
+private View [] items;
 
 
     public PhotosAdapter(Context context)
@@ -27,22 +29,47 @@ private ImageData[] images;
     inflater= LayoutInflater.from(context);
 
     images=null;
+    items=null;
     }
 
 
     @Override
     public Object instantiateItem(ViewGroup container, int position)
     {
-    View viewItem= inflater.inflate(R.layout.vp_photo_item, null);
+    final ImageView imageView;
+    final ProgressBar loading;
 
-    ImageView imageView=(ImageView) viewItem.findViewById(R.id.iv_photo);
-    ProgressBar loading=(ProgressBar) viewItem.findViewById(R.id.pb_loading);
+    if(items[position]==null)
+        {
+        items[position]= inflater.inflate(R.layout.vp_photo_item, null);
 
-    ImageLoaderManager.loadImage(images[position], imageView, loading, container.getWidth(), container.getHeight());
+        imageView=(ImageView) items[position].findViewById(R.id.iv_photo);
+        loading=(ProgressBar) items[position].findViewById(R.id.pb_loading);
 
-    container.addView(viewItem);
+        images[position].setOnLoadListener(new OnLoadListener()
+            {
+                @Override
+                public void onPreLoad()
+                {
+                loading.setVisibility(View.VISIBLE);
+                }
 
-    return viewItem;
+
+                @Override
+                public void onLoad()
+                {
+                loading.setVisibility(View.GONE);
+                }
+            });
+
+        images[position].setImageView(imageView);
+        images[position].load(0, container.getHeight());
+        }
+
+
+    container.addView(items[position]);
+
+    return items[position];
     }
 
 
@@ -51,12 +78,27 @@ private ImageData[] images;
     if(photoUrls!=null)
         {
         images=new ImageData[photoUrls.length];
+        items=new View[photoUrls.length];
 
         for(int i=0 ; i<photoUrls.length ; i++)
             {
             images[i]=new ImageData(photoUrls[i]);
             }
         }
+
+    notifyDataSetChanged();
+    }
+
+
+    public void clearImages()
+    {
+
+    for(int i=0 ; i < getCount() ; i++)
+        {
+        images[i].remove();
+        }
+
+    images=null;
 
     notifyDataSetChanged();
     }

@@ -2,91 +2,73 @@ package com.osh.apps.maps.activity;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
+import android.location.Location;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.osh.apps.maps.R;
+import com.osh.apps.maps.activity.callback.PlaceDetailsCallback;
 import com.osh.apps.maps.adapter.FragmentsAdapter;
 import com.osh.apps.maps.app.AppData;
 import com.osh.apps.maps.database.DatabaseManager;
 import com.osh.apps.maps.fragment.DetailsFragment;
-import com.osh.apps.maps.fragment.TabFragment;
+import com.osh.apps.maps.fragment.MapFragment;
+import com.osh.apps.maps.place.Place;
 
 
-public class PlaceDetailsActivity extends AppCompatActivity
+public class PlaceDetailsActivity extends BaseActivity implements PlaceDetailsCallback
 {
-private static final String EXTRA_PLACE_NAME="placeName";
 private static final String EXTRA_PLACE_ID="placeId";
 
 private FragmentsAdapter fragmentsAdapter;
 private DatabaseManager databaseManager;
 private DetailsFragment detailsFragment;
-private boolean isFavouritePlace;
-private TabFragment mapFragment;
+private MapFragment mapFragment;
 private int mapFragmentPosition;
 private ViewPager viewPager;
-private long placeId;
+private Place place;
 
 
-    public static void openActivity(Context context, long placeId, String placeName)
+    public static void openActivity(Context context, long placeId)
     {
     Intent intent=new Intent(context, PlaceDetailsActivity.class);
     intent.putExtra(EXTRA_PLACE_ID, placeId);
-    intent.putExtra(EXTRA_PLACE_NAME, placeName);
     context.startActivity(intent);
     }
 
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState)
+    protected void onCreate()
     {
-    super.onCreate(savedInstanceState);
-
-    setContentView(R.layout.activity_place_details);
-
-    init();
-
-    setViews();
-    }
-
-
-    private void init()
-    {
+    long placeId;
 
     databaseManager=DatabaseManager.getInstance(this);
 
     placeId=getIntent().getLongExtra(EXTRA_PLACE_ID, AppData.NULL_DATA);
 
+    place=databaseManager.getPlace(placeId);
+
     detailsFragment=DetailsFragment.newInstance(placeId);
 
-    mapFragment=new TabFragment()
-        {
-            @Override
-            public int getTitleRes()
-            {
-            return R.string.map;
-            }
-        };
+    mapFragment=new MapFragment();
 
     fragmentsAdapter=new FragmentsAdapter( this, getSupportFragmentManager(), detailsFragment, mapFragment );
 
     mapFragmentPosition=fragmentsAdapter.getItemPosition(mapFragment);
-
-    isFavouritePlace=databaseManager.isFavouritePlace(placeId);
     }
 
 
-    private void setViews()
+    protected void onCreateView()
     {
+    setContentView(R.layout.activity_place_details);
+
     Toolbar toolbar=(Toolbar) findViewById(R.id.toolbar);
     setSupportActionBar(toolbar);
 
-    getSupportActionBar().setTitle(getIntent().getStringExtra(EXTRA_PLACE_NAME));
+    getSupportActionBar().setTitle(place.getName());
 
     viewPager=(ViewPager) findViewById(R.id.ViewPager);
     viewPager.setAdapter(fragmentsAdapter);
@@ -110,7 +92,7 @@ private long placeId;
     @Override
     public boolean onPrepareOptionsMenu(Menu menu)
     {
-    if(isFavouritePlace)
+    if(place.isFavourite())
         {
         menu.findItem(R.id.m_favourite_toggle).setIcon(R.mipmap.ic_menu_star);
         }else
@@ -125,16 +107,51 @@ private long placeId;
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
+    boolean isFavouritePlace;
 
     if(item.getItemId() == R.id.m_favourite_toggle)
         {
-        isFavouritePlace=!isFavouritePlace;
-        databaseManager.updatePlace(placeId, isFavouritePlace);
+        isFavouritePlace=!(place.isFavourite());
+
+        databaseManager.updatePlace(place.getId(), isFavouritePlace);
+        place.setFavourite(isFavouritePlace);
 
         invalidateOptionsMenu();
         }
 
-
     return true;
+    }
+
+
+    @Override
+    public void onLocationChanged(Location location)
+    {
+    detailsFragment.onLocationChanged(location);
+
+    if(location!=null)
+        {
+        Toast.makeText(this, "provider = "+ location.getProvider() , Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
+    @Override
+    public void showMap()
+    {
+
+    }
+
+
+    @Override
+    public void showDetails()
+    {
+
+    }
+
+
+    @Override
+    public Location getCurrentLocation()
+    {
+    return getLocation();
     }
 }
