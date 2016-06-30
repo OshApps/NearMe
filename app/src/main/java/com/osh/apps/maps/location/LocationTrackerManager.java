@@ -159,7 +159,6 @@ private Handler handler;
 
                 Log.d("LTM-onLocationChanged","gps updates removed");
                 }
-
             }
         };
 

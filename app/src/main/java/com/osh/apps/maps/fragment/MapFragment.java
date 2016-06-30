@@ -8,7 +8,7 @@ import com.osh.apps.maps.R;
  */
 public class MapFragment extends BaseFragment
 {
-private static final int TITLE_RES=R.string.search_tab_title;
+private static final int TITLE_RES=R.string.map_tab_title;
 
 
     @Override

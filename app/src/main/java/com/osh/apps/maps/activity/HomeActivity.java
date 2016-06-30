@@ -11,6 +11,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
@@ -26,9 +27,9 @@ import com.osh.apps.maps.activity.callback.HomeActivityCallback;
 import com.osh.apps.maps.adapter.FragmentsAdapter;
 import com.osh.apps.maps.app.AppData;
 import com.osh.apps.maps.dialog.SimpleAlertDialog;
+import com.osh.apps.maps.fragment.BaseFragment;
 import com.osh.apps.maps.fragment.FavouritesFragment;
 import com.osh.apps.maps.fragment.SearchFragment;
-import com.osh.apps.maps.fragment.BaseFragment;
 import com.osh.apps.maps.location.LocationTrackerManager;
 import com.osh.apps.maps.place.Place;
 
@@ -124,8 +125,11 @@ private long lastPlaceId;
     viewPager=(ViewPager) findViewById(R.id.ViewPager);
     viewPager.setAdapter(fragmentsAdapter);
 
+
     TabLayout tabLayout = (TabLayout) findViewById(R.id.tl_tabs);
     tabLayout.setupWithViewPager(viewPager);
+
+    ViewCompat.setLayoutDirection(tabLayout, View.LAYOUT_DIRECTION_LTR);
     }
 
 

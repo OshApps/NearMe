@@ -93,6 +93,7 @@ private Place place;
     view=inflater.inflate(R.layout.fragment_place_details, container, false);
 
     viewPager=(ViewPager) view.findViewById(R.id.vp_photos);
+    viewPager.setOffscreenPageLimit(2);
     viewPager.setAdapter(photosAdapter);
 
     rating=(RatingBar) view.findViewById(R.id.rb_rating);

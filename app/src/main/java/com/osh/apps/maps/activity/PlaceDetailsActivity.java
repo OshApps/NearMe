@@ -4,10 +4,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.support.design.widget.TabLayout;
+import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.osh.apps.maps.R;
@@ -63,18 +66,25 @@ private Place place;
 
     protected void onCreateView()
     {
+    ActionBar actionBar;
+
     setContentView(R.layout.activity_place_details);
 
     Toolbar toolbar=(Toolbar) findViewById(R.id.toolbar);
     setSupportActionBar(toolbar);
 
-    getSupportActionBar().setTitle(place.getName());
+    actionBar=getSupportActionBar();
+    actionBar.setTitle(place.getName());
+    actionBar.setHomeButtonEnabled(true);
+    actionBar.setDisplayHomeAsUpEnabled(true);
 
     viewPager=(ViewPager) findViewById(R.id.ViewPager);
     viewPager.setAdapter(fragmentsAdapter);
 
     TabLayout tabLayout = (TabLayout) findViewById(R.id.tl_tabs);
     tabLayout.setupWithViewPager(viewPager);
+
+    ViewCompat.setLayoutDirection(tabLayout, View.LAYOUT_DIRECTION_LTR);
     }
 
 
@@ -109,14 +119,24 @@ private Place place;
     {
     boolean isFavouritePlace;
 
-    if(item.getItemId() == R.id.m_favourite_toggle)
+    switch (item.getItemId())
         {
-        isFavouritePlace=!(place.isFavourite());
+        case R.id.m_favourite_toggle:
+         isFavouritePlace=!(place.isFavourite());
 
         databaseManager.updatePlace(place.getId(), isFavouritePlace);
         place.setFavourite(isFavouritePlace);
 
         invalidateOptionsMenu();
+        break;
+
+        case android.R.id.home:
+        onBackPressed();
+        break;
+        }
+    if(item.getItemId() == R.id.m_favourite_toggle)
+        {
+
         }
 
     return true;

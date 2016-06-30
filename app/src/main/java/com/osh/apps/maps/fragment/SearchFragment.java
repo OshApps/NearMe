@@ -121,7 +121,7 @@ private TextView msg;
 
         if(isSearching)
             {
-            recyclerView.setVisibility(View.GONE);
+            adapter.clearPlaces();
             loading.setVisibility(View.VISIBLE);
             }
         }
@@ -174,7 +174,6 @@ private TextView msg;
 
     adapter.clearPlaces();
 
-    recyclerView.setVisibility(View.GONE);
     loading.setVisibility(View.VISIBLE);
 
     SearchService.startActionSearch(getContext(), keyword, lat, lng);
@@ -374,7 +373,6 @@ private TextView msg;
         switch(status)
             {
             case SearchService.STATUS_OK:
-            recyclerView.setVisibility(View.VISIBLE);
             adapter.setPlaces(databaseManager.getLastSearch());
             onLocationChanged(homeActivityCallback.getCurrentLocation());
             break;
