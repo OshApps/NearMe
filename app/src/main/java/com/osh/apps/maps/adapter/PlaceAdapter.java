@@ -6,10 +6,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.osh.apps.maps.adapter.holder.PlaceHolder;
+import com.osh.apps.maps.adapter.holder.SearchPlaceHolder;
 import com.osh.apps.maps.app.AppData;
 import com.osh.apps.maps.place.Place;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 
 /**
@@ -163,23 +166,54 @@ private int layout;
 
     public void removePlace(int position)
     {
+    Place place;
 
     if(position >= 0 && position < places.size())
         {
-        places.remove(position);
+        place=places.remove(position);
         notifyItemRemoved(position);
+
+        place.removeIconImage();
         }
+    }
+
+
+    public void updateDistance(double lat, double lng)
+    {
+
+    for(Place place: places)
+        {
+        place.updateDistance(lat, lng);
+        }
+    }
+
+
+    public void refresh()
+    {
+    notifyItemRangeChanged( 0, places.size());
     }
 
 
     public void clearPlaces()
     {
+    Iterator<Place> iterator;
+    Place place;
     int size;
 
     if(!places.isEmpty())
         {
         size=places.size();
-        places.clear();
+
+        iterator=places.iterator();
+
+        while(iterator.hasNext())
+            {
+            place= iterator.next();
+
+            place.removeIconImage();
+
+            iterator.remove();
+            }
 
         notifyItemRangeRemoved(0 , size);
         }

@@ -1,6 +1,7 @@
 package com.osh.apps.maps.fragment;
 
 import android.content.Context;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
@@ -11,25 +12,21 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.osh.apps.maps.HomeActivityCallback;
 import com.osh.apps.maps.R;
+import com.osh.apps.maps.activity.callback.HomeActivityCallback;
 import com.osh.apps.maps.adapter.PlaceAdapter;
-import com.osh.apps.maps.app.AppData;
 import com.osh.apps.maps.database.DatabaseManager;
 import com.osh.apps.maps.place.Place;
 import com.osh.apps.maps.widget.recyclerview.CustomRecyclerView;
 
 
-public class FavouritesFragment extends TabFragment implements CustomRecyclerView.OnItemClickListener, CustomRecyclerView.OnItemLongClickListener
+public class FavouritesFragment extends BaseFragment implements CustomRecyclerView.OnItemClickListener, CustomRecyclerView.OnItemLongClickListener
 {
-public static final int FRAGMENT_ID=1;
-
-private static final int TITLE_RES=R.string.favourites_tab;
+private static final int TITLE_RES=R.string.favourites_tab_title;
 
 private HomeActivityCallback homeActivityCallback;
 private CustomRecyclerView recyclerView;
 private DatabaseManager databaseManager;
-private int lastItemClickedPosition;
 private PlaceAdapter adapter;
 private PopupMenu popupMenu;
 private TextView msg;
@@ -53,14 +50,23 @@ private TextView msg;
     {
     super.onCreate(savedInstanceState);
 
-    databaseManager=DatabaseManager.getInstance(getContext());
+    Location location;
 
-    lastItemClickedPosition=AppData.NULL_DATA;
+    databaseManager=DatabaseManager.getInstance(getContext());
 
     popupMenu=null;
 
     adapter=new PlaceAdapter(getContext(), R.layout.rv_favourite_place_item);
     adapter.setPlaces(databaseManager.getFavouritePlaces());
+
+    location=homeActivityCallback.getCurrentLocation();
+
+    if(location!=null)
+        {
+        adapter.updateDistance(location.getLatitude(),location.getLongitude());
+        }
+
+    onLocationChanged(homeActivityCallback.getCurrentLocation());
     }
 
 
@@ -116,6 +122,16 @@ private TextView msg;
     }
 
 
+    public void onLocationChanged(Location location)
+    {
+    if(location!=null && isCreated())
+        {
+        adapter.updateDistance(location.getLatitude(),location.getLongitude());
+        adapter.refresh();
+        }
+    }
+
+
     private void updateMessage()
     {
 
@@ -133,7 +149,6 @@ private TextView msg;
     @Override
     public void onItemClick(RecyclerView.ViewHolder viewHolder, int position, int viewType)
     {
-    lastItemClickedPosition=position;
     openPlaceDetailsActivity(position);
     }
 
@@ -194,10 +209,7 @@ private TextView msg;
 
     databaseManager.updatePlace(placeId, false);
 
-    if(homeActivityCallback!=null)
-        {
-        homeActivityCallback.onRemoveFavouritePlace(FRAGMENT_ID, placeId);
-        }
+    homeActivityCallback.onRemoveFavouritePlace(this, placeId);
 
     updateMessage();
     }
@@ -240,11 +252,9 @@ private TextView msg;
     {
     Place place;
 
-    lastItemClickedPosition=position;
-
     place=adapter.getItem(position);
 
-    homeActivityCallback.openPlaceDetailsActivity(place.getId(), place.getName());
+    homeActivityCallback.openPlaceDetailsActivity(place.getId());
     }
 
 

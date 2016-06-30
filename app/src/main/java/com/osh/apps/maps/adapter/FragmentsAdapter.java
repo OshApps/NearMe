@@ -5,7 +5,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
-import com.osh.apps.maps.fragment.TabFragment;
+import com.osh.apps.maps.fragment.BaseFragment;
 
 
 /**
@@ -13,11 +13,11 @@ import com.osh.apps.maps.fragment.TabFragment;
  */
 public class FragmentsAdapter extends FragmentPagerAdapter
 {
-private TabFragment[] fragments;
+private BaseFragment[] fragments;
 private Context context;
 
 
-    public FragmentsAdapter(Context context, FragmentManager fm, TabFragment... fragments )
+    public FragmentsAdapter(Context context, FragmentManager fm, BaseFragment... fragments )
     {
     super(fm);
 
@@ -47,7 +47,7 @@ private Context context;
     }
 
 
-    public int getItemPosition(Fragment fragment)
+    public int getItemPosition(BaseFragment fragment)
     {
     int itemPosition=POSITION_NONE;
 

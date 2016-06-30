@@ -1,14 +1,11 @@
 package com.osh.apps.maps.fragment;
 
-import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
-import android.location.LocationManager;
+import android.location.Location;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
@@ -20,32 +17,24 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.osh.apps.maps.HomeActivityCallback;
 import com.osh.apps.maps.R;
+import com.osh.apps.maps.activity.callback.HomeActivityCallback;
 import com.osh.apps.maps.adapter.PlaceAdapter;
-import com.osh.apps.maps.app.AppData;
 import com.osh.apps.maps.database.DatabaseManager;
-import com.osh.apps.maps.location.LocationRequest;
-import com.osh.apps.maps.permission.PermissionManager;
 import com.osh.apps.maps.place.Place;
 import com.osh.apps.maps.service.SearchService;
 import com.osh.apps.maps.widget.recyclerview.CustomRecyclerView;
 
 
-public class SearchFragment extends TabFragment implements LocationRequest.LocationRequestListener, CustomRecyclerView.OnItemClickListener, CustomRecyclerView.OnItemLongClickListener
+public class SearchFragment extends BaseFragment implements CustomRecyclerView.OnItemClickListener, CustomRecyclerView.OnItemLongClickListener
 {
-public static final int FRAGMENT_ID=0;
-
-private static final int TITLE_RES=R.string.search_tab;
-
-private static final int LOCATION_REQUEST_CODE=0;
+private static final int TITLE_RES=R.string.search_tab_title;
+private static final String SEARCH_STATE_KEY="isSearching";
 
 private HomeActivityCallback homeActivityCallback;
-private LocationRequest locationRequest;
 private CustomRecyclerView recyclerView;
 private DatabaseManager databaseManager;
 private SearchReceiver searchReceiver;
-private int lastItemClickedPosition;
 private PlaceAdapter adapter;
 private PopupMenu popupMenu;
 private ProgressBar loading;
@@ -70,18 +59,23 @@ private TextView msg;
     {
     super.onCreate(savedInstanceState);
 
-    databaseManager=DatabaseManager.getInstance(getContext());
+    Location location;
 
-    lastItemClickedPosition=AppData.NULL_DATA;
+    databaseManager=DatabaseManager.getInstance(getContext());
 
     popupMenu=null;
 
     adapter=new PlaceAdapter(getContext(), R.layout.rv_search_place_item);
     adapter.setPlaces(databaseManager.getLastSearch());
 
-    searchReceiver=new SearchReceiver();
+    location=homeActivityCallback.getCurrentLocation();
 
-    locationRequest=new LocationRequest((LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE), this);
+    if(location!=null)
+        {
+        adapter.updateDistance(location.getLatitude(),location.getLongitude());
+        }
+
+    searchReceiver=new SearchReceiver();
 
     LocalBroadcastManager.getInstance(getContext()).registerReceiver(searchReceiver,new IntentFilter(SearchService.ACTION_SEARCH));
     }
@@ -92,6 +86,15 @@ private TextView msg;
     {
     // Inflate the layout for this fragment
     View view=inflater.inflate(R.layout.fragment_search_list_places, container, false);
+
+    view.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+            onHideMessage();
+            }
+        });
 
     recyclerView=(CustomRecyclerView) view.findViewById(R.id.RecyclerView);
     recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -105,6 +108,31 @@ private TextView msg;
     msg=(TextView) view.findViewById(R.id.tv_message);
 
     return view;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+    super.onActivityCreated(savedInstanceState);
+    boolean isSearching;
+
+    if (savedInstanceState != null)
+        {
+        isSearching=savedInstanceState.getBoolean(SEARCH_STATE_KEY);
+
+        if(isSearching)
+            {
+            recyclerView.setVisibility(View.GONE);
+            loading.setVisibility(View.VISIBLE);
+            }
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState)
+    {
+    super.onSaveInstanceState(outState);
+
+    outState.putBoolean(SEARCH_STATE_KEY, loading.getVisibility() == View.VISIBLE);
     }
 
 
@@ -140,44 +168,51 @@ private TextView msg;
     }
 
 
-    public void onSearch(String keyword)
+    public void onSearch(String keyword, double lat, double lng)
     {
-    adapter.setPlaces(null);
+    onHideMessage();
 
+    adapter.clearPlaces();
+
+    recyclerView.setVisibility(View.GONE);
     loading.setVisibility(View.VISIBLE);
-    msg.setVisibility(View.GONE);
 
-    locationRequest.setKeyword(keyword);
+    SearchService.startActionSearch(getContext(), keyword, lat, lng);
+    }
 
-    if(PermissionManager.checkPermission(this, Manifest.permission.ACCESS_FINE_LOCATION, LOCATION_REQUEST_CODE))
+
+    public void onLocationChanged(Location location)
+    {
+    if(location!=null && isCreated())
         {
-        locationRequest.prepareRequest();
+        adapter.updateDistance(location.getLatitude(),location.getLongitude());
+        adapter.refresh();
         }
     }
 
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
+    public void onLocationNotFound()
     {
-    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    showMessage(getString(R.string.location_error_1) + "\n" + getString(R.string.location_error_2));
+    }
 
-    switch(requestCode)
+
+    private void showMessage(String message)
+    {
+    msg.setText(message);
+    msg.setVisibility(View.VISIBLE);
+    loading.setVisibility(View.GONE);
+    recyclerView.setVisibility(View.GONE);
+    }
+
+
+    private void onHideMessage()
+    {
+    if(msg.getVisibility() == View.VISIBLE)
         {
-        case LOCATION_REQUEST_CODE:
-
-        if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-            {
-            locationRequest.prepareRequest();
-            }else
-                {
-                msg.setText(getString(R.string.no_location_access));
-                msg.setVisibility(View.VISIBLE);
-                loading.setVisibility(View.GONE);
-                }
-
-        break;
+        msg.setVisibility(View.GONE);
+        recyclerView.setVisibility(View.VISIBLE);
         }
-
     }
 
 
@@ -255,16 +290,14 @@ private TextView msg;
 
     databaseManager.updatePlace(place.getId(), isFavoritePlace );
 
-    if(homeActivityCallback!=null)
+
+    if(isFavoritePlace)
         {
-        if(isFavoritePlace)
+        homeActivityCallback.onAddFavouritePlace(place);
+        }else
             {
-            homeActivityCallback.onAddFavouritePlace(place);
-            }else
-                {
-                homeActivityCallback.onRemoveFavouritePlace(FRAGMENT_ID, place.getId());
-                }
-        }
+            homeActivityCallback.onRemoveFavouritePlace(this, place.getId());
+            }
 
     place.setFavourite(isFavoritePlace);
     adapter.notifyItemChanged(position);
@@ -312,18 +345,9 @@ private TextView msg;
     {
     Place place;
 
-    lastItemClickedPosition=position;
-
     place=adapter.getItem(position);
 
-    homeActivityCallback.openPlaceDetailsActivity(place.getId(), place.getName());
-    }
-
-
-    @Override
-    public void onRequestReady(String keyword, double lat, double lng)
-    {
-    SearchService.startActionSearch(getContext(), keyword, lat, lng);
+    homeActivityCallback.openPlaceDetailsActivity(place.getId());
     }
 
 
@@ -350,11 +374,17 @@ private TextView msg;
         switch(status)
             {
             case SearchService.STATUS_OK:
+            recyclerView.setVisibility(View.VISIBLE);
             adapter.setPlaces(databaseManager.getLastSearch());
+            onLocationChanged(homeActivityCallback.getCurrentLocation());
             break;
 
             case SearchService.STATUS_ZERO_RESULTS:
             message=getString(R.string.no_results);
+            break;
+
+            case SearchService.STATUS_OVER_QUERY_LIMIT:
+            message=getString(R.string.search_locked_1) + "\n" + getString(R.string.search_locked_2);
             break;
 
             case SearchService.STATUS_ERROR:
@@ -364,11 +394,11 @@ private TextView msg;
 
         if(message!=null)
             {
-            msg.setText(message);
-            msg.setVisibility(View.VISIBLE);
-            }
-
-        loading.setVisibility(View.GONE);
+            showMessage(message);
+            }else
+                {
+                loading.setVisibility(View.GONE);
+                }
         }
     }
 

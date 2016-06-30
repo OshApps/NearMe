@@ -1,4 +1,4 @@
-package com.osh.apps.maps.adapter;
+package com.osh.apps.maps.adapter.holder;
 
 import android.view.View;
 import android.widget.ImageView;

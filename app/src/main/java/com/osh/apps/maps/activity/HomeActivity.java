@@ -1,29 +1,43 @@
 package com.osh.apps.maps.activity;
 
 import android.content.Context;
-import android.os.Bundle;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Toast;
 
-import com.osh.apps.maps.HomeActivityCallback;
 import com.osh.apps.maps.R;
+import com.osh.apps.maps.activity.callback.HomeActivityCallback;
 import com.osh.apps.maps.adapter.FragmentsAdapter;
 import com.osh.apps.maps.app.AppData;
+import com.osh.apps.maps.dialog.SimpleAlertDialog;
 import com.osh.apps.maps.fragment.FavouritesFragment;
 import com.osh.apps.maps.fragment.SearchFragment;
+import com.osh.apps.maps.fragment.BaseFragment;
+import com.osh.apps.maps.location.LocationTrackerManager;
 import com.osh.apps.maps.place.Place;
 
+import java.util.List;
 
-public class HomeActivity extends AppCompatActivity implements HomeActivityCallback
+
+public class HomeActivity extends BaseActivity implements HomeActivityCallback
 {
+private ConnectivityManager connectivityManager;
 private FavouritesFragment favouritesFragment;
 private FragmentsAdapter fragmentsAdapter;
 private SearchFragment searchFragment;
@@ -33,35 +47,67 @@ private ViewPager viewPager;
 private long lastPlaceId;
 
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState)
+    protected void onCreate()
     {
-    super.onCreate(savedInstanceState);
-
-    setContentView(R.layout.activity_home);
-
-    init();
-
-    setViews();
-    }
-
-
-    private void init()
-    {
-    searchFragment=SearchFragment.newInstance();
-    favouritesFragment=FavouritesFragment.newInstance();
+    FragmentManager fragmentManager;
 
     lastPlaceId=AppData.NULL_DATA;
 
-    fragmentsAdapter=new FragmentsAdapter( this , getSupportFragmentManager(), searchFragment, favouritesFragment );
+    connectivityManager=(ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+    fragmentManager=getSupportFragmentManager();
+
+    onCreateFragments(fragmentManager);
+
+    fragmentsAdapter=new FragmentsAdapter( this ,fragmentManager , searchFragment, favouritesFragment );
 
     searchFragmentPosition=fragmentsAdapter.getItemPosition(searchFragment);
-
     }
 
 
-    private void setViews()
+    private void onCreateFragments(FragmentManager fragmentManager)
     {
+    List<Fragment> fragments;
+
+    fragments=fragmentManager.getFragments();
+
+    if(fragments != null)
+        {
+
+        for(Fragment fragment: fragments)
+            {
+
+            if(fragment instanceof SearchFragment)
+                {
+                searchFragment=(SearchFragment) fragment;
+                continue;
+                }
+
+            if(fragment instanceof FavouritesFragment)
+                {
+                favouritesFragment=(FavouritesFragment) fragment;
+                continue;
+                }
+            }
+
+        }
+
+    if(searchFragment == null)
+        {
+        searchFragment=SearchFragment.newInstance();
+        }
+
+    if(favouritesFragment == null)
+        {
+        favouritesFragment=FavouritesFragment.newInstance();
+        }
+    }
+
+
+    protected void onCreateView()
+    {
+    setContentView(R.layout.activity_home);
+
     Toolbar toolbar=(Toolbar) findViewById(R.id.toolbar);
     setSupportActionBar(toolbar);
 
@@ -71,9 +117,7 @@ private long lastPlaceId;
             @Override
             public void onClick(View view)
             {
-            searchFragment.onSearch(null);
-
-            viewPager.setCurrentItem(searchFragmentPosition,true);
+            onSearch(null);
             }
         });
 
@@ -88,11 +132,13 @@ private long lastPlaceId;
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
+    MenuItem searchItem;
+
     getMenuInflater().inflate( R.menu.menu_home_activity, menu);
 
-    MenuItem myActionMenuItem = menu.findItem( R.id.m_search);
+    searchItem = menu.findItem( R.id.m_search);
 
-    searchView = (SearchView) myActionMenuItem.getActionView();
+    searchView = (SearchView) searchItem.getActionView();
     searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener()
         {
             @Override
@@ -100,9 +146,7 @@ private long lastPlaceId;
             {
             hideKeyboard();
 
-            searchFragment.onSearch(query);
-
-            viewPager.setCurrentItem(searchFragmentPosition, true);
+            onSearch(query);
             return true;
             }
 
@@ -128,6 +172,7 @@ private long lastPlaceId;
         {
         case R.id.m_clear_history:
         //TODO
+        //deleteDatabase(Database.DATABASE_NAME);
         break;
 
         case R.id.m_setting:
@@ -147,7 +192,6 @@ private long lastPlaceId;
     {
     super.onResume();
 
-
     if(lastPlaceId != AppData.NULL_DATA)
         {
         favouritesFragment.onPlaceChanged(lastPlaceId);
@@ -156,6 +200,109 @@ private long lastPlaceId;
         lastPlaceId=AppData.NULL_DATA;
         }
 
+    }
+
+
+    public void onSearch(final String keyword)
+    {
+    LocationTrackerManager locationTrackerManager;
+    Location location;
+
+    locationTrackerManager=getLocationTrackerManager(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                    onSearch(keyword);
+                    }
+                });
+
+    if(locationTrackerManager != null) //has permissions
+        {
+
+        if(locationTrackerManager.isLocationEnabled())
+            {
+            location=locationTrackerManager.getCurrentLocation();
+
+            if(location !=null)
+                {
+
+                if(isOnline())
+                    {
+                    searchFragment.onSearch(keyword, location.getLatitude(), location.getLongitude());
+                    }else
+                        {
+                        SimpleAlertDialog.createAlertDialog(this, getString(R.string.network_connection), getString(R.string.network_connection_msg), getString(R.string.settings), getString(R.string.cancel), new SimpleAlertDialog.AlertDialogListener()
+                            {
+                                @Override
+                                public void onPositive(DialogInterface dialog)
+                                {
+                                startActivity(new Intent(Settings.ACTION_SETTINGS));
+                                }
+
+
+                                @Override
+                                public void onNegative(DialogInterface dialog)
+                                {
+
+                                }
+                            });
+
+                        Log.d("HA-onSearch","network is not available");
+                        }
+
+                }else
+                    {
+                    searchFragment.onLocationNotFound();
+                    Log.d("HA-onSearch","failed to find your location");
+                    }
+            }else
+                {
+                SimpleAlertDialog.createAlertDialog(this, getString(R.string.enable_location), getString(R.string.enable_location_msg), getString(R.string.settings), getString(R.string.cancel), new SimpleAlertDialog.AlertDialogListener()
+                    {
+                        @Override
+                        public void onPositive(DialogInterface dialog)
+                        {
+                        startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                        }
+
+
+                        @Override
+                        public void onNegative(DialogInterface dialog)
+                        {
+
+                        }
+                    });
+
+                Log.d("HA-onSearch","location is not enable");
+                }
+        }else
+            {
+            Log.d("HA-onSearch","no have Permissions");
+            }
+
+    viewPager.setCurrentItem(searchFragmentPosition, true);
+    }
+
+
+    public boolean isOnline()
+    {
+    NetworkInfo netInfo = connectivityManager.getActiveNetworkInfo();
+
+    return netInfo != null && netInfo.isConnectedOrConnecting();
+    }
+
+
+    @Override
+    public void onLocationChanged(Location location)
+    {
+    searchFragment.onLocationChanged(location);
+    favouritesFragment.onLocationChanged(location);
+
+    if(location!=null)
+        {
+        Toast.makeText(this, "provider = "+ location.getProvider() , Toast.LENGTH_SHORT).show();
+        }
     }
 
 
@@ -172,21 +319,28 @@ private long lastPlaceId;
 
 
     @Override
-    public void openPlaceDetailsActivity(long placeId, String name)
+    public Location getCurrentLocation()
     {
-    lastPlaceId=placeId;
-
-    PlaceDetailsActivity.openActivity(this, placeId, name);
+    return getLocation();
     }
 
 
     @Override
-    public void onRemoveFavouritePlace(int fragmentId, long placeId)
+    public void openPlaceDetailsActivity(long placeId)
     {
-    if(fragmentId == FavouritesFragment.FRAGMENT_ID)
+    lastPlaceId=placeId;
+
+    PlaceDetailsActivity.openActivity(this, placeId);
+    }
+
+
+    @Override
+    public void onRemoveFavouritePlace(BaseFragment fragment, long placeId)
+    {
+    if(fragment == favouritesFragment)
         {
         searchFragment.onFavouritePlaceRemoved(placeId);
-        }else if(fragmentId == SearchFragment.FRAGMENT_ID)
+        }else if(fragment == searchFragment)
             {
             favouritesFragment.onFavouritePlaceRemoved(placeId);
             }
