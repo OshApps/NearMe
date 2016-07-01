@@ -21,8 +21,8 @@ public static final int NULL_DATA=-1;
     public static final String KEY_DISTANCE_TYPE="distance_type";
     public static final String KEY_RADIUS="radius";
 
-    private static final int KM_TYPE=1;
-    private static final int MIL_TYPE=2;
+    public static final int KM_TYPE=1;
+    public static final int MIL_TYPE=2;
 
     public static final int DEFAULT_RADIUS=500;
     public static final int DEFAULT_DISTANCE_TYPE=KM_TYPE;
@@ -31,13 +31,50 @@ public static final int NULL_DATA=-1;
     private static final float MIL=1609.344f;
 
 
+        public static String[] getDistanceTypes(Context context)
+        {
+        return new String[]{context.getString(R.string.distance_type_km), context.getString(R.string.distance_type_mil)};
+        }
+
+
+        public static String[] getDistanceTypeValues()
+        {
+        return new String[]{String.valueOf(KM_TYPE), String.valueOf(MIL_TYPE)};
+        }
+
+
+        public static String getDistanceTypeText(Context context)
+        {
+        int distanceType=getSharedPreferences(context).getInt(KEY_DISTANCE_TYPE, DEFAULT_DISTANCE_TYPE);
+
+        return getDistanceTypeText(context, distanceType);
+        }
+
+
+        public static String getDistanceTypeText(Context context, int distanceType)
+        {
+        String distanceTypeText;
+
+        switch(distanceType)
+            {
+            case MIL_TYPE:
+            distanceTypeText=context.getString(R.string.distance_type_mil);
+            break;
+
+            case KM_TYPE:
+            default:
+            distanceTypeText=context.getString(R.string.distance_type_km);
+            break;
+
+            }
+
+        return distanceTypeText;
+        }
+
+
         public static int getRadius(Context context)
         {
-        SharedPreferences sharedPreferences;
-
-        sharedPreferences=context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-
-        return sharedPreferences.getInt(KEY_RADIUS, DEFAULT_RADIUS);
+        return getSharedPreferences(context).getInt(KEY_RADIUS, DEFAULT_RADIUS);
         }
 
 
@@ -48,7 +85,7 @@ public static final int NULL_DATA=-1;
         float distanceResult;
         int distanceType;
 
-        sharedPreferences=context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        sharedPreferences=getSharedPreferences(context);
 
         distanceType= sharedPreferences.getInt(KEY_DISTANCE_TYPE, DEFAULT_DISTANCE_TYPE);
 
@@ -68,6 +105,12 @@ public static final int NULL_DATA=-1;
             }
 
         return String.format(distanceText, distanceResult);
+        }
+
+
+        private static SharedPreferences getSharedPreferences(Context context)
+        {
+        return context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
         }
     }
 

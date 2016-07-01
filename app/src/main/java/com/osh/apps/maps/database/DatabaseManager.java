@@ -169,6 +169,13 @@ private static DatabaseManager instance;
     }
 
 
+    public void removeAllFavourites()
+    {
+    updateFromTable(Table.Places.TABLE_NAME, addColStatement(Table.Places.COL_FAVOURITE, String.valueOf(Table.FALSE), false) , null);
+    deleteFromTable(Table.Places.TABLE_NAME, addColStatement(Table.Places.COL_SEARCH, String.valueOf(Table.FALSE), false));
+    }
+
+
     public Place getPlace(long placeId)
     {
     Cursor cursor;
@@ -202,4 +209,7 @@ private static DatabaseManager instance;
     return isExist(Table.Places.TABLE_NAME, addColStatement(Table.Places.COL_PLACE_ID, String.valueOf(placeId), false)+
                                             addColStatement(Table.Places.COL_FAVOURITE, String.valueOf(Table.TRUE), false, OPERATOR_AND));
     }
+
+
+
 }

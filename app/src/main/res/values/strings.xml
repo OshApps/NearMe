@@ -1,9 +1,14 @@
 <resources>
     <string name="app_name">Osh Maps</string>
 
-    <string name="favourites_tab_title">Favourites</string>
-    <string name="search_tab_title">Search</string>
-    <string name="map_tab_title">Map</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <string name="title_tab_favourites">Favourites</string>
+    <string name="title_tab_search">Search</string>
+    <string name="title_tab_map">Map</string>
+    <string name="title_tab_details">Details</string>
+
+
     <string name="clear_history_search">Clear History Search</string>
     <string name="settings">Settings</string>
     <string name="search">Search</string>
@@ -13,7 +18,6 @@
     <string name="search_locked_1">The search is locked!</string>
     <string name="search_locked_2">Please try again later</string>
     <string name="no_location_access">Location access is required</string>
-    <string name="details_tab">Details</string>
     <string name="error">Error</string>
     <string name="places_api_key">AIzaSyC5I_AJm7WkW3TXMu3XvLWIn7EvA8Asr2c</string>
     <string name="open">Open</string>
@@ -31,4 +35,14 @@
     <string name="location_error_2">Please try again</string>
     <string name="distance_km">%.2f km</string>
     <string name="distance_mil">%.2f mil</string>
+    <string name="distance_type_km">Kilometers</string>
+    <string name="distance_type_mil">Miles</string>
+    <string name="summary_radius">Radius:</string>
+    <string name="summary_remove_favourites">remove all places from your favourites list</string>
+    <string name="title_distance_type">Distance Type</string>
+    <string name="title_search_radius">Search Radius</string>
+    <string name="title_remove_favourites">Remove Favourites</string>
+    <string name="message_remove_favourites">Are you sure you want to remove all your favourite places?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 </resources>

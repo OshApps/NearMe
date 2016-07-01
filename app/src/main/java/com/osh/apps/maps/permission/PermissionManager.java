@@ -42,7 +42,7 @@ public class PermissionManager
 
     private static boolean hasPermission(Activity activity, String permission )
     {
-    return (Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.M) || ( ContextCompat.checkSelfPermission(activity, permission) == PackageManager.PERMISSION_GRANTED);
+    return (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) || ( ContextCompat.checkSelfPermission(activity, permission) == PackageManager.PERMISSION_GRANTED);
     }
 
 }

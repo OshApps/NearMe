@@ -28,7 +28,7 @@ import org.json.JSONObject;
 
 public class DetailsFragment extends BaseFragment implements View.OnClickListener
 {
-private static final int TITLE_RES=R.string.details_tab;
+private static final int TITLE_RES=R.string.title_tab_details;
 
 private static final String ARG_PLACE_ID="placeId";
 

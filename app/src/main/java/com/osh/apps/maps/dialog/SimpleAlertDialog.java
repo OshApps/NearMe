@@ -63,7 +63,7 @@ public final class SimpleAlertDialog
 
     public interface AlertDialogListener
     {
-        public void onPositive(DialogInterface dialog);
-        public void onNegative(DialogInterface dialog);
+        void onPositive(DialogInterface dialog);
+        void onNegative(DialogInterface dialog);
     }
 }

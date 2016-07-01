@@ -9,6 +9,8 @@ import android.os.Handler;
 import android.support.annotation.RequiresPermission;
 import android.util.Log;
 
+import java.util.List;
+
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
 
@@ -24,7 +26,7 @@ private static final long GPS_TIMEOUT=1000*60*3; // 3 minutes
 
 private static LocationTrackerManager instance;
 
-private boolean isGPSEnabled,isNetworkEnabled,isGpsFix,isRegistered;
+private boolean hasGPSProvider,hasNetworkProvider,isGPSEnabled,isNetworkEnabled,isGpsFix,isRegistered;
 private OnLocationChangedListener locationChangedListener;
 private LocationListener gpsListener,networkListener;
 private LocationManager locationManager;
@@ -49,6 +51,7 @@ private Handler handler;
     private LocationTrackerManager(LocationManager locationManager)
     {
     Location bestLocation,gpsLocation,networkLocation;
+    List<String> providers;
 
     this.locationManager=locationManager;
 
@@ -58,6 +61,11 @@ private Handler handler;
     isRegistered=false;
 
     handler=new Handler();
+
+    providers=locationManager.getAllProviders();
+
+    hasGPSProvider=providers.contains(LocationManager.GPS_PROVIDER);
+    hasNetworkProvider=providers.contains(LocationManager.NETWORK_PROVIDER);
 
     isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
     isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
@@ -175,12 +183,15 @@ private Handler handler;
     if(!isRegistered)
         {
 
-        if(gpsListener!=null)
+        if(hasGPSProvider && gpsListener!=null)
             {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME_UPDATE, MIN_DISTANCE_UPDATE, gpsListener);
             }
 
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_UPDATE, MIN_DISTANCE_UPDATE, networkListener);
+        if(hasNetworkProvider)
+            {
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_UPDATE, MIN_DISTANCE_UPDATE, networkListener);
+            }
 
         isRegistered=true;
         }
@@ -217,7 +228,11 @@ private Handler handler;
         return;
         }
 
-    Log.d("LTM","updateLocation left time = " + (location.getTime() - currentLocation.getTime()) /1000 );
+    if(currentLocation!=null)
+        {
+         Log.d("LTM","updateLocation left time = " + (location.getTime() - currentLocation.getTime()) /1000 );
+        }
+
 
     isGpsLocation=location.getProvider().equals(LocationManager.GPS_PROVIDER);
 

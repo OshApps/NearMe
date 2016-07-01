@@ -33,11 +33,15 @@ import com.osh.apps.maps.fragment.SearchFragment;
 import com.osh.apps.maps.location.LocationTrackerManager;
 import com.osh.apps.maps.place.Place;
 
+import java.io.File;
 import java.util.List;
+import java.util.Locale;
 
 
 public class HomeActivity extends BaseActivity implements HomeActivityCallback
 {
+private static final int SETTINGS_REQUEST=1;
+
 private ConnectivityManager connectivityManager;
 private FavouritesFragment favouritesFragment;
 private FragmentsAdapter fragmentsAdapter;
@@ -63,6 +67,9 @@ private long lastPlaceId;
     fragmentsAdapter=new FragmentsAdapter( this ,fragmentManager , searchFragment, favouritesFragment );
 
     searchFragmentPosition=fragmentsAdapter.getItemPosition(searchFragment);
+
+    Log.d("HA-onCreate","defaultLocale= " + Locale.getDefault().toString());
+    Log.d("HA-onCreate","resLocale= "+getResources().getConfiguration().locale.toString());
     }
 
 
@@ -170,6 +177,7 @@ private long lastPlaceId;
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
+    Intent intent;
     boolean isActionDone=true;
 
     switch(item.getItemId())
@@ -177,10 +185,25 @@ private long lastPlaceId;
         case R.id.m_clear_history:
         //TODO
         //deleteDatabase(Database.DATABASE_NAME);
+        File folder=new File(getFilesDir().getParent()+File.separator+"shared_prefs");
+
+        File[] files=folder.listFiles();
+
+        if(files != null)
+            {
+            for(File file : files)
+                {
+                file.delete();
+                }
+            }
+
+        folder.delete();
         break;
 
         case R.id.m_setting:
-        //TODO
+
+        intent=new Intent(this, SettingsActivity.class);
+        startActivityForResult(intent,SETTINGS_REQUEST);
         break;
 
         default:
@@ -202,6 +225,38 @@ private long lastPlaceId;
         searchFragment.onPlaceChanged(lastPlaceId);
 
         lastPlaceId=AppData.NULL_DATA;
+        }
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+    super.onActivityResult(requestCode, resultCode, data);
+
+    boolean isFavouritesRemoved,isDistanceTypeChanged;
+
+    if (resultCode == RESULT_OK)
+        {
+
+        if(requestCode == SETTINGS_REQUEST)
+            {
+            isFavouritesRemoved=data.getBooleanExtra(SettingsActivity.KEY_FAVOURITES_REMOVED, false);
+            isDistanceTypeChanged=data.getBooleanExtra(SettingsActivity.KEY_DISTANCE_TYPE_CHANGED, false);
+
+            if(isFavouritesRemoved)
+                {
+                searchFragment.onFavouritesRemoved();
+                favouritesFragment.onFavouritesRemoved();
+
+                }else if(isDistanceTypeChanged)
+                    {
+                    searchFragment.refresh();
+                    favouritesFragment.refresh();
+                    }
+            }
+
+
         }
 
     }

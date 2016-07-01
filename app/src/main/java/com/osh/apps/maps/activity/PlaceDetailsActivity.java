@@ -121,8 +121,9 @@ private Place place;
 
     switch (item.getItemId())
         {
+
         case R.id.m_favourite_toggle:
-         isFavouritePlace=!(place.isFavourite());
+        isFavouritePlace=!(place.isFavourite());
 
         databaseManager.updatePlace(place.getId(), isFavouritePlace);
         place.setFavourite(isFavouritePlace);
@@ -133,9 +134,6 @@ private Place place;
         case android.R.id.home:
         onBackPressed();
         break;
-        }
-    if(item.getItemId() == R.id.m_favourite_toggle)
-        {
 
         }
 

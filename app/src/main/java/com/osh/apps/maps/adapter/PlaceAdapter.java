@@ -178,6 +178,18 @@ private int layout;
     }
 
 
+    public void unfavouriteAllPlaces()
+    {
+
+    for(Place place: places)
+        {
+        place.setFavourite(false);
+        }
+
+    refresh();
+    }
+
+
     public void updateDistance(double lat, double lng)
     {
 

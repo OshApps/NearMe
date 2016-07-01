@@ -22,7 +22,7 @@ import com.osh.apps.maps.widget.recyclerview.CustomRecyclerView;
 
 public class FavouritesFragment extends BaseFragment implements CustomRecyclerView.OnItemClickListener, CustomRecyclerView.OnItemLongClickListener
 {
-private static final int TITLE_RES=R.string.favourites_tab_title;
+private static final int TITLE_RES=R.string.title_tab_favourites;
 
 private HomeActivityCallback homeActivityCallback;
 private CustomRecyclerView recyclerView;
@@ -119,6 +119,24 @@ private TextView msg;
     super.onResume();
 
     updateMessage();
+    }
+
+
+    public void refresh()
+    {
+    if(isCreated())
+        {
+        adapter.refresh();
+        }
+    }
+
+
+    public void onFavouritesRemoved()
+    {
+    if(isCreated())
+        {
+        adapter.clearPlaces();
+        }
     }
 
 
@@ -263,4 +281,5 @@ private TextView msg;
     {
     return TITLE_RES;
     }
+
 }

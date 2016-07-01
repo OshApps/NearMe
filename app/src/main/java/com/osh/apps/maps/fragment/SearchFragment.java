@@ -28,8 +28,8 @@ import com.osh.apps.maps.widget.recyclerview.CustomRecyclerView;
 
 public class SearchFragment extends BaseFragment implements CustomRecyclerView.OnItemClickListener, CustomRecyclerView.OnItemLongClickListener
 {
-private static final int TITLE_RES=R.string.search_tab_title;
-private static final String SEARCH_STATE_KEY="isSearching";
+private static final int TITLE_RES=R.string.title_tab_search;
+private static final String KEY_SEARCH_STATE="isSearching";
 
 private HomeActivityCallback homeActivityCallback;
 private CustomRecyclerView recyclerView;
@@ -110,6 +110,7 @@ private TextView msg;
     return view;
     }
 
+
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
@@ -117,7 +118,7 @@ private TextView msg;
 
     if (savedInstanceState != null)
         {
-        isSearching=savedInstanceState.getBoolean(SEARCH_STATE_KEY);
+        isSearching=savedInstanceState.getBoolean(KEY_SEARCH_STATE);
 
         if(isSearching)
             {
@@ -127,12 +128,13 @@ private TextView msg;
         }
     }
 
+
     @Override
     public void onSaveInstanceState(Bundle outState)
     {
     super.onSaveInstanceState(outState);
 
-    outState.putBoolean(SEARCH_STATE_KEY, loading.getVisibility() == View.VISIBLE);
+    outState.putBoolean(KEY_SEARCH_STATE, loading.getVisibility() == View.VISIBLE);
     }
 
 
@@ -177,6 +179,24 @@ private TextView msg;
     loading.setVisibility(View.VISIBLE);
 
     SearchService.startActionSearch(getContext(), keyword, lat, lng);
+    }
+
+
+    public void refresh()
+    {
+    if(isCreated())
+        {
+        adapter.refresh();
+        }
+    }
+
+
+    public void onFavouritesRemoved()
+    {
+    if(isCreated())
+        {
+        adapter.unfavouriteAllPlaces();
+        }
     }
 
 
@@ -355,6 +375,8 @@ private TextView msg;
     {
     return TITLE_RES;
     }
+
+
 
 
     private class SearchReceiver extends BroadcastReceiver
