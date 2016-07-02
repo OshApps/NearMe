@@ -3,7 +3,7 @@
              android:layout_height="match_parent"
              >
 
-   <com.osh.apps.maps.widget.recyclerview.CustomRecyclerView
+   <com.osh.apps.nearme.widget.recyclerview.CustomRecyclerView
         android:id="@+id/RecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
