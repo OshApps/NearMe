@@ -11,31 +11,37 @@ import android.view.View;
  */
 public abstract class BaseFragment extends Fragment
 {
-private boolean isCreated=false;
-
+private boolean isCreated;
 
 abstract public int getTitleRes();
 
 
-   public BaseFragment()
-   {
+    public BaseFragment()
+    {
 
-   }
-
-
-   @Override
-   public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
-   {
-   super.onViewCreated(view, savedInstanceState);
-
-   isCreated=true;
-   }
+    }
 
 
-   public boolean isCreated()
-   {
-   return isCreated;
-   }
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState)
+    {
+    super.onCreate(savedInstanceState);
+
+    isCreated=false;
+    }
 
 
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
+    {
+    super.onViewCreated(view, savedInstanceState);
+
+    isCreated=true;
+    }
+
+
+    public boolean isCreated()
+    {
+    return isCreated;
+    }
 }

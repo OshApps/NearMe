@@ -19,7 +19,6 @@
     <string name="search_locked_2">Please try again later</string>
     <string name="no_location_access">Location access is required</string>
     <string name="error">Error</string>
-    <string name="places_api_key">AIzaSyC5I_AJm7WkW3TXMu3XvLWIn7EvA8Asr2c</string>
     <string name="open">Open</string>
     <string name="delete">Delete</string>
     <string name="add_favourites">Add To Favourites</string>
@@ -45,4 +44,6 @@
     <string name="message_remove_favourites">Are you sure you want to remove all your favourite places?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+
+    <string name="google_api_key" translatable="false">AIzaSyC5I_AJm7WkW3TXMu3XvLWIn7EvA8Asr2c</string>
 </resources>

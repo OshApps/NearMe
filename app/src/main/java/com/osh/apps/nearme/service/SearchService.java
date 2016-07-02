@@ -83,7 +83,7 @@ public static final int STATUS_ERROR=3;
 
     status=STATUS_ERROR;
 
-    apiKey=getString(R.string.places_api_key);
+    apiKey=getString(R.string.google_api_key);
 
     url=AppData.PlacesAPI.createSearchUrl(keyword, lat , lng, AppData.Preferences.getRadius(this), apiKey);
 

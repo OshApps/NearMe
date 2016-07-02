@@ -293,7 +293,7 @@ private Place place;
 
         photoUrls=null;
 
-        apiKey=getString(R.string.places_api_key);
+        apiKey=getString(R.string.google_api_key);
 
         try {
             json=new JSONObject( JsonConnection.getJsonResult( AppData.PlacesAPI.createDetailsUrl( place.getGoogleId(), apiKey ) ) );

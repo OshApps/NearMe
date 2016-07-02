@@ -58,7 +58,7 @@ private Place place;
 
     mapFragment=new MapFragment();
 
-    fragmentsAdapter=new FragmentsAdapter( this, getSupportFragmentManager(), detailsFragment, mapFragment );
+    fragmentsAdapter=new FragmentsAdapter(this, getSupportFragmentManager(), detailsFragment, mapFragment);
 
     mapFragmentPosition=fragmentsAdapter.getItemPosition(mapFragment);
     }

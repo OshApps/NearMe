@@ -27,13 +27,11 @@ import com.osh.apps.nearme.activity.callback.HomeActivityCallback;
 import com.osh.apps.nearme.adapter.FragmentsAdapter;
 import com.osh.apps.nearme.app.AppData;
 import com.osh.apps.nearme.dialog.SimpleAlertDialog;
-import com.osh.apps.nearme.fragment.BaseFragment;
 import com.osh.apps.nearme.fragment.FavouritesFragment;
 import com.osh.apps.nearme.fragment.SearchFragment;
 import com.osh.apps.nearme.location.LocationTrackerManager;
 import com.osh.apps.nearme.place.Place;
 
-import java.io.File;
 import java.util.List;
 import java.util.Locale;
 
@@ -132,11 +130,10 @@ private long lastPlaceId;
     viewPager=(ViewPager) findViewById(R.id.ViewPager);
     viewPager.setAdapter(fragmentsAdapter);
 
-
     TabLayout tabLayout = (TabLayout) findViewById(R.id.tl_tabs);
     tabLayout.setupWithViewPager(viewPager);
 
-    ViewCompat.setLayoutDirection(tabLayout, View.LAYOUT_DIRECTION_LTR);
+    ViewCompat.setLayoutDirection(tabLayout, ViewCompat.LAYOUT_DIRECTION_LTR);
     }
 
 
@@ -185,6 +182,8 @@ private long lastPlaceId;
         case R.id.m_clear_history:
         //TODO
         //deleteDatabase(Database.DATABASE_NAME);
+
+        /* remove shared preference file
         File folder=new File(getFilesDir().getParent()+File.separator+"shared_prefs");
 
         File[] files=folder.listFiles();
@@ -198,6 +197,8 @@ private long lastPlaceId;
             }
 
         folder.delete();
+        */
+
         break;
 
         case R.id.m_setting:
@@ -394,11 +395,12 @@ private long lastPlaceId;
 
 
     @Override
-    public void onRemoveFavouritePlace(BaseFragment fragment, long placeId)
+    public void onRemoveFavouritePlace(Fragment fragment, long placeId)
     {
     if(fragment == favouritesFragment)
         {
         searchFragment.onFavouritePlaceRemoved(placeId);
+
         }else if(fragment == searchFragment)
             {
             favouritesFragment.onFavouritePlaceRemoved(placeId);

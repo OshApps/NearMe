@@ -23,7 +23,6 @@ private Context context;
 
     this.context=context;
     this.fragments=fragments;
-
     }
 
 

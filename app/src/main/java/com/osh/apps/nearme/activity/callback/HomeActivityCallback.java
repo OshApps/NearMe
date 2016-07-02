@@ -1,6 +1,7 @@
 package com.osh.apps.nearme.activity.callback;
 
-import com.osh.apps.nearme.fragment.BaseFragment;
+import android.support.v4.app.Fragment;
+
 import com.osh.apps.nearme.place.Place;
 
 
@@ -10,7 +11,6 @@ import com.osh.apps.nearme.place.Place;
 public interface HomeActivityCallback extends LocationCallback
 {
 void openPlaceDetailsActivity(long placeId);
-void onRemoveFavouritePlace(BaseFragment fragment, long placeId);
+void onRemoveFavouritePlace(Fragment fragment, long placeId);
 void onAddFavouritePlace(Place place);
-
 }
