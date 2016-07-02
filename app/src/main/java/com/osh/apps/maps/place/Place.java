@@ -21,6 +21,14 @@ private float rating;
 private long id;
 
 
+    public Place(Place place)
+    {
+    this(place.id, place.googleId, place.name, place.address, place.lat, place.lng, place.rating, place.iconImage.getUrl(), place.phone, place.website, place.isFavourite);
+
+    distance=place.distance;
+    }
+
+
     public Place(long id, String googleId, String name, String address, double lat, double lng, float rating, String iconUrl, String phone, String website, boolean isFavourite)
     {
     this.id=id;

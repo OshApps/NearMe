@@ -312,7 +312,7 @@ private TextView msg;
 
     if(isFavoritePlace)
         {
-        homeActivityCallback.onAddFavouritePlace(place);
+        homeActivityCallback.onAddFavouritePlace(new Place(place));
         }else
             {
             homeActivityCallback.onRemoveFavouritePlace(this, place.getId());
