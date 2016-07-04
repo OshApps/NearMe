@@ -10,8 +10,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Toast;
 
 import com.osh.apps.nearme.R;
 import com.osh.apps.nearme.activity.callback.PlaceDetailsCallback;
@@ -54,9 +52,9 @@ private Place place;
 
     place=databaseManager.getPlace(placeId);
 
-    detailsFragment=DetailsFragment.newInstance(placeId);
+    detailsFragment=DetailsFragment.newInstance(place.getId());
 
-    mapFragment=new MapFragment();
+    mapFragment=MapFragment.newInstance(place.getName(), place.getLat(), place.getLng());
 
     fragmentsAdapter=new FragmentsAdapter(this, getSupportFragmentManager(), detailsFragment, mapFragment);
 
@@ -84,7 +82,7 @@ private Place place;
     TabLayout tabLayout = (TabLayout) findViewById(R.id.tl_tabs);
     tabLayout.setupWithViewPager(viewPager);
 
-    ViewCompat.setLayoutDirection(tabLayout, View.LAYOUT_DIRECTION_LTR);
+    ViewCompat.setLayoutDirection(tabLayout, ViewCompat.LAYOUT_DIRECTION_LTR);
     }
 
 
@@ -104,10 +102,10 @@ private Place place;
     {
     if(place.isFavourite())
         {
-        menu.findItem(R.id.m_favourite_toggle).setIcon(R.mipmap.ic_menu_star);
+        menu.findItem(R.id.m_favourite_toggle).setIcon(R.drawable.ic_menu_star);
         }else
             {
-            menu.findItem(R.id.m_favourite_toggle).setIcon(R.mipmap.ic_menu_star_border);
+            menu.findItem(R.id.m_favourite_toggle).setIcon(R.drawable.ic_menu_star_border);
             }
 
     return true;
@@ -145,11 +143,7 @@ private Place place;
     public void onLocationChanged(Location location)
     {
     detailsFragment.onLocationChanged(location);
-
-    if(location!=null)
-        {
-        Toast.makeText(this, "provider = "+ location.getProvider() , Toast.LENGTH_SHORT).show();
-        }
+    mapFragment.onLocationChanged(location);
     }
 
 

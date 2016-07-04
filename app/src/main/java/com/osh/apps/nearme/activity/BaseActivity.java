@@ -38,7 +38,10 @@ abstract protected void onCreateView();
 
     onCreate();
 
-    createLocationTrackerManager(null);
+    if(PermissionManager.checkPermission(this, Manifest.permission.ACCESS_FINE_LOCATION, LOCATION_REQUEST_CODE))
+        {
+        createLocationTrackerManager();
+        }
 
     onCreateView();
     }
@@ -49,18 +52,18 @@ abstract protected void onCreateView();
 
     if(locationTrackerManager==null)
         {
-        createLocationTrackerManager(action);
+        requestLocationTrackerManager(action);
         }
 
     return locationTrackerManager;
     }
 
 
-    private void createLocationTrackerManager(Runnable action)
+    private void requestLocationTrackerManager(Runnable action)
     {
     lastAction=action;
 
-    if(PermissionManager.checkPermission(this, Manifest.permission.ACCESS_FINE_LOCATION, LOCATION_REQUEST_CODE))
+    if(PermissionManager.requestPermission(this, Manifest.permission.ACCESS_FINE_LOCATION, LOCATION_REQUEST_CODE))
         {
         createLocationTrackerManager();
         }

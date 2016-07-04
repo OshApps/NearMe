@@ -197,6 +197,7 @@ private Place place;
     }
 
 
+    @Override
     public void onLocationChanged(Location location)
     {
 

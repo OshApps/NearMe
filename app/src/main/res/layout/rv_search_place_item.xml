@@ -19,7 +19,6 @@
 
         card_view:cardCornerRadius="4dp"
         card_view:cardElevation="4dp"
-
         >
 
         <RelativeLayout
@@ -38,7 +37,7 @@
                 android:layout_centerVertical="true"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true"
-                android:background="@mipmap/ic_star"
+                android:background="@drawable/ic_star"
                 android:visibility="gone"
                 />
 

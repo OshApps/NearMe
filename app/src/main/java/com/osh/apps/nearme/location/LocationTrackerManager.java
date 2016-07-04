@@ -92,65 +92,65 @@ private Handler handler;
         }
 
     gpsListener=new LocationListener()
-    {
-        @Override
-        public void onLocationChanged(Location location)
         {
-        updateLocation(location);
-        }
+            @Override
+            public void onLocationChanged(Location location)
+            {
+            updateLocation(location);
+            }
 
 
-        @Override
-        public void onStatusChanged(String provider, int status, Bundle extras)
-        {
-        Log.d("LTM-onStatusChanged","provider= "+ provider+" status= "+status);
-        }
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras)
+            {
+            Log.d("LTM-onStatusChanged","provider= "+ provider+" status= "+status);
+            }
 
 
-        @Override
-        public void onProviderEnabled(String provider)
-        {
-        isGPSEnabled=true;
-        }
+            @Override
+            public void onProviderEnabled(String provider)
+            {
+            isGPSEnabled=true;
+            }
 
 
-        @Override
-        public void onProviderDisabled(String provider)
-        {
-        isGPSEnabled=false;
-        }
-    };
+            @Override
+            public void onProviderDisabled(String provider)
+            {
+            isGPSEnabled=false;
+            }
+        };
 
 
     networkListener=new LocationListener()
-    {
-        @Override
-        public void onLocationChanged(Location location)
         {
-        updateLocation(location);
-        }
+            @Override
+            public void onLocationChanged(Location location)
+            {
+            updateLocation(location);
+            }
 
 
-        @Override
-        public void onStatusChanged(String provider, int status, Bundle extras)
-        {
-        Log.d("LTM-onStatusChanged","provider= "+ provider+" status= "+status);
-        }
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras)
+            {
+            Log.d("LTM-onStatusChanged","provider= "+ provider+" status= "+status);
+            }
 
 
-        @Override
-        public void onProviderEnabled(String provider)
-        {
-        isNetworkEnabled=true;
-        }
+            @Override
+            public void onProviderEnabled(String provider)
+            {
+            isNetworkEnabled=true;
+            }
 
 
-        @Override
-        public void onProviderDisabled(String provider)
-        {
-        isNetworkEnabled=false;
-        }
-    };
+            @Override
+            public void onProviderDisabled(String provider)
+            {
+            isNetworkEnabled=false;
+            }
+        };
 
     removeGpsUpdatesAction=new Runnable()
         {

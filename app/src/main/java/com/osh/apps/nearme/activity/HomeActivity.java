@@ -20,7 +20,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Toast;
 
 import com.osh.apps.nearme.R;
 import com.osh.apps.nearme.activity.callback.HomeActivityCallback;
@@ -140,13 +139,11 @@ private long lastPlaceId;
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-    MenuItem searchItem;
 
     getMenuInflater().inflate( R.menu.menu_home_activity, menu);
 
-    searchItem = menu.findItem( R.id.m_search);
 
-    searchView = (SearchView) searchItem.getActionView();
+    searchView = (SearchView) menu.findItem( R.id.m_search).getActionView();
     searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener()
         {
             @Override
@@ -358,11 +355,6 @@ private long lastPlaceId;
     {
     searchFragment.onLocationChanged(location);
     favouritesFragment.onLocationChanged(location);
-
-    if(location!=null)
-        {
-        Toast.makeText(this, "provider = "+ location.getProvider() , Toast.LENGTH_SHORT).show();
-        }
     }
 
 
