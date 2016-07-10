@@ -5,6 +5,6 @@ package com.osh.apps.nearme.activity.callback;
  */
 public interface PlaceDetailsCallback extends LocationCallback
 {
-void showMap();
-void showDetails();
+void onClickDetail();
+
 }

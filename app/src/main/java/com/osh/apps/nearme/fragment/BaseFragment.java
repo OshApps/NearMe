@@ -42,6 +42,15 @@ abstract public void onLocationChanged(Location location);
     }
 
 
+    @Override
+    public void onDestroyView()
+    {
+    super.onDestroyView();
+
+    isCreated=false;
+    }
+
+
     public boolean isCreated()
     {
     return isCreated;

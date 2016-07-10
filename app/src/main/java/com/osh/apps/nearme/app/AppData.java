@@ -1,9 +1,14 @@
 package com.osh.apps.nearme.app;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 
 import com.osh.apps.nearme.R;
+import com.osh.apps.nearme.place.Place;
+
+import java.util.Locale;
 
 
 /**
@@ -11,7 +16,40 @@ import com.osh.apps.nearme.R;
  */
 public final class AppData
 {
+public static final String DEFAULT_LANGUAGE="en_US";
 public static final int NULL_DATA=-1;
+
+
+    public static void setAppLocale(Context context)
+    {
+    String currentLanguage;
+    Configuration config;
+    Locale defaultLocale;
+
+    currentLanguage=context.getString(R.string.language);
+
+    if(currentLanguage.equals(DEFAULT_LANGUAGE))
+        {
+        defaultLocale = new Locale(DEFAULT_LANGUAGE);
+
+        Locale.setDefault(defaultLocale);
+
+        config = new Configuration();
+        config.locale = defaultLocale;
+
+        context.getApplicationContext().getResources().updateConfiguration(config, null);
+        }
+    }
+
+
+    public static void sharePlace(Context context, Place place)
+    {
+    Intent shareIntent = new Intent();
+    shareIntent.setAction(Intent.ACTION_SEND);
+    shareIntent.putExtra(Intent.EXTRA_TEXT, place.getName() + "\n" + place.getAddress());
+    shareIntent.setType("text/plain");
+    context.startActivity(shareIntent);
+    }
 
 
     public static final class Preferences

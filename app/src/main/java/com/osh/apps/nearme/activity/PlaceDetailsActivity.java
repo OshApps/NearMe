@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
@@ -11,6 +13,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.osh.apps.nearme.menu.PlaceMenu;
 import com.osh.apps.nearme.R;
 import com.osh.apps.nearme.activity.callback.PlaceDetailsCallback;
 import com.osh.apps.nearme.adapter.FragmentsAdapter;
@@ -20,6 +23,8 @@ import com.osh.apps.nearme.fragment.DetailsFragment;
 import com.osh.apps.nearme.fragment.MapFragment;
 import com.osh.apps.nearme.place.Place;
 
+import java.util.List;
+
 
 public class PlaceDetailsActivity extends BaseActivity implements PlaceDetailsCallback
 {
@@ -28,6 +33,7 @@ private static final String EXTRA_PLACE_ID="placeId";
 private FragmentsAdapter fragmentsAdapter;
 private DatabaseManager databaseManager;
 private DetailsFragment detailsFragment;
+private FragmentManager fragmentManager;
 private MapFragment mapFragment;
 private int mapFragmentPosition;
 private ViewPager viewPager;
@@ -42,26 +48,69 @@ private Place place;
     }
 
 
+    @Override
     protected void onCreate()
     {
     long placeId;
+
+    detailsFragment=null;
+    mapFragment=null;
 
     databaseManager=DatabaseManager.getInstance(this);
 
     placeId=getIntent().getLongExtra(EXTRA_PLACE_ID, AppData.NULL_DATA);
 
     place=databaseManager.getPlace(placeId);
+    }
 
-    detailsFragment=DetailsFragment.newInstance(place.getId());
 
-    mapFragment=MapFragment.newInstance(place.getName(), place.getLat(), place.getLng());
+    @Override
+    protected void onCreateFragments()
+    {
+    List<Fragment> fragments;
 
-    fragmentsAdapter=new FragmentsAdapter(this, getSupportFragmentManager(), detailsFragment, mapFragment);
+    fragmentManager=getSupportFragmentManager();
+
+    fragments=fragmentManager.getFragments();
+
+    if(fragments != null)
+        {
+
+        for(Fragment fragment: fragments)
+            {
+
+            if(fragment instanceof DetailsFragment)
+                {
+                detailsFragment=(DetailsFragment) fragment;
+                continue;
+                }
+
+            if(fragment instanceof MapFragment)
+                {
+                mapFragment=(MapFragment) fragment;
+                continue;
+                }
+            }
+
+        }
+
+    if(detailsFragment == null)
+        {
+        detailsFragment=DetailsFragment.newInstance(place.getId());
+        }
+
+    if(mapFragment == null)
+        {
+        mapFragment=MapFragment.newInstance(place.getId());
+        }
+
+    fragmentsAdapter=new FragmentsAdapter(this, fragmentManager, detailsFragment, mapFragment);
 
     mapFragmentPosition=fragmentsAdapter.getItemPosition(mapFragment);
     }
 
 
+    @Override
     protected void onCreateView()
     {
     ActionBar actionBar;
@@ -89,24 +138,7 @@ private Place place;
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-    getMenuInflater().inflate(R.menu.menu_place_details, menu);
-
-    menu.findItem(R.id.m_favourite_toggle).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
-
-    return true;
-    }
-
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu)
-    {
-    if(place.isFavourite())
-        {
-        menu.findItem(R.id.m_favourite_toggle).setIcon(R.drawable.ic_menu_star);
-        }else
-            {
-            menu.findItem(R.id.m_favourite_toggle).setIcon(R.drawable.ic_menu_star_border);
-            }
+    PlaceMenu.createPlaceMenu(menu, getMenuInflater(), place.isFavourite());
 
     return true;
     }
@@ -126,11 +158,21 @@ private Place place;
         databaseManager.updatePlace(place.getId(), isFavouritePlace);
         place.setFavourite(isFavouritePlace);
 
-        invalidateOptionsMenu();
+        if(isFavouritePlace)
+            {
+            item.setIcon(R.drawable.ic_menu_star);
+            }else
+                {
+                item.setIcon(R.drawable.ic_menu_star_border);
+                }
         break;
 
         case android.R.id.home:
         onBackPressed();
+        break;
+
+        case R.id.m_share:
+        AppData.sharePlace(this, place);
         break;
 
         }
@@ -148,22 +190,16 @@ private Place place;
 
 
     @Override
-    public void showMap()
-    {
-
-    }
-
-
-    @Override
-    public void showDetails()
-    {
-
-    }
-
-
-    @Override
     public Location getCurrentLocation()
     {
     return getLocation();
+    }
+
+
+    @Override
+    public void onClickDetail()
+    {
+    viewPager.setCurrentItem(mapFragmentPosition, true);
+    mapFragment.animatePlaceMarker();
     }
 }

@@ -4,19 +4,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="?android:colorBackground"
     >
 
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1.5"
         android:background="#BDBDBD"
         >
 
         <android.support.v4.view.ViewPager
             android:id="@+id/vp_photos"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
 
 
     </RelativeLayout>
@@ -33,6 +35,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
             android:isIndicator="true"
             android:numStars="5"
             />
@@ -42,7 +45,9 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="5dp">
+        android:layout_weight="1"
+        android:layout_marginTop="5dp"
+        >
 
         <ScrollView
             android:layout_width="match_parent"
@@ -94,7 +99,7 @@
                                 android:id="@+id/tv_address"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:textSize="23sp"/>
+                                android:textSize="@dimen/text_size"/>
 
                         </HorizontalScrollView>
 
@@ -128,7 +133,7 @@
                         <ImageView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:background="@drawable/ic_map"/>
+                            android:background="@drawable/ic_ruler"/>
 
                         <TextView
                             android:id="@+id/tv_distance"
@@ -137,7 +142,7 @@
                             android:layout_gravity="center_vertical"
                             android:layout_marginLeft="15dp"
                             android:layout_marginStart="15dp"
-                            android:textSize="23sp"/>
+                            android:textSize="@dimen/text_size"/>
 
                     </LinearLayout>
 
@@ -178,7 +183,7 @@
                             android:layout_gravity="center_vertical"
                             android:layout_marginLeft="15dp"
                             android:layout_marginStart="15dp"
-                            android:textSize="23sp"/>
+                            android:textSize="@dimen/text_size"/>
 
                     </LinearLayout>
 
@@ -210,7 +215,7 @@
                         <ImageView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:background="@drawable/ic_map"/>
+                            android:background="@drawable/ic_website"/>
 
                         <HorizontalScrollView
                             android:layout_width="wrap_content"
@@ -225,7 +230,7 @@
                                 android:id="@+id/tv_website"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:textSize="23sp"
+                                android:textSize="@dimen/text_size"
                                 />
 
                         </HorizontalScrollView>

@@ -70,15 +70,11 @@ private Place place;
     {
     super.onCreate(savedInstanceState);
 
-    long placeId;
-
     placeDetailsTask=new PlaceDetailsTask();
 
     databaseManager=DatabaseManager.getInstance(getContext());
 
-    placeId=getArguments().getLong(ARG_PLACE_ID, AppData.NULL_DATA);
-
-    place=databaseManager.getPlace(placeId);
+    place=databaseManager.getPlace(getArguments().getLong(ARG_PLACE_ID));
 
     photosAdapter=new PhotosAdapter(getContext());
     }
@@ -111,6 +107,7 @@ private Place place;
 
     phoneCard.setOnClickListener(this);
     websiteCard.setOnClickListener(this);
+    distanceCard.setOnClickListener(this);
     addressText.setOnClickListener(this);
     distanceText.setOnClickListener(this);
     phoneText.setOnClickListener(this);
@@ -153,7 +150,7 @@ private Place place;
             placeDetailsCallback=(PlaceDetailsCallback) context;
             }else
                 {
-                throw new RuntimeException(context.toString()+" must implement HomeActivityCallback");
+                throw new RuntimeException(context.toString()+" must implement PlaceListCallback");
                 }
     }
 
@@ -219,14 +216,14 @@ private Place place;
         case R.id.tv_address:
         case R.id.cv_address:
 
-        placeDetailsCallback.showMap();
+        placeDetailsCallback.onClickDetail();
 
         break;
 
         case R.id.tv_distance:
         case R.id.cv_distance:
 
-        placeDetailsCallback.showMap();
+        placeDetailsCallback.onClickDetail();
 
         break;
 
@@ -261,19 +258,6 @@ private Place place;
     }
 
 
-    public void showDetails()
-    {
-    //TODO animation
-
-    /*
-    for(int i=0 ; i<detailsLayout.getChildCount() ; i++)
-        {
-        detailsLayout.getChildAt(i).startAnimation(???);
-        }
-    */
-    }
-
-
     @Override
     public int getTitleRes()
     {
@@ -301,9 +285,8 @@ private Place place;
 
             result=json.getJSONObject("result");
 
-
-
-            try {
+            if(result.has("photos"))
+                {
                 photos=result.getJSONArray("photos");
 
                 photoUrls=new String[photos.length()];
@@ -312,8 +295,7 @@ private Place place;
                     {
                     photoUrls[i]=AppData.PlacesAPI.createPhotoUrl(photos.getJSONObject(i).getString("photo_reference"), apiKey);
                     }
-
-                }catch(Exception e){}
+                }
 
             }catch(Exception e)
                 {

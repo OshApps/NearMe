@@ -6,6 +6,9 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -14,9 +17,12 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.osh.apps.nearme.R;
+import com.osh.apps.nearme.database.DatabaseManager;
 import com.osh.apps.nearme.permission.PermissionManager;
+import com.osh.apps.nearme.place.Place;
 
 import java.security.Permissions;
 
@@ -30,13 +36,13 @@ private static final int TITLE_RES=R.string.title_tab_map;
 
 private static final int DEFAULT_ZOOM=18;
 
-private static final String ARG_PLACE_NAME="placeName";
-private static final String ARG_PLACE_LAT="placeLat";
-private static final String ARG_PLACE_LNG="placeLng";
+private static final String ARG_PLACE_ID="placeId";
 
 private FloatingActionButton myLocationButton;
 private LatLng placeLocation,myLocation;
+private DatabaseManager databaseManager;
 private GoogleMap googleMap;
+private Marker placeMarker;
 private String placeName;
 private MapView mapView;
 
@@ -47,19 +53,25 @@ private MapView mapView;
     }
 
 
-    public static MapFragment newInstance(String placeName, double placeLat, double placeLng)
+    public static MapFragment newInstance(long placeId)
     {
     MapFragment fragment;
     Bundle args;
 
     args=new Bundle();
 
-    args.putString(ARG_PLACE_NAME, placeName);
-    args.putDouble(ARG_PLACE_LAT, placeLat);
-    args.putDouble(ARG_PLACE_LNG, placeLng);
+    args.putLong(ARG_PLACE_ID, placeId);
 
     fragment=new MapFragment();
     fragment.setArguments(args);
+
+    return fragment;
+    }
+
+
+    public static MapFragment newInstance()
+    {
+    MapFragment fragment=new MapFragment();
 
     return fragment;
     }
@@ -69,16 +81,20 @@ private MapView mapView;
     public void onCreate(@Nullable Bundle savedInstanceState)
     {
     super.onCreate(savedInstanceState);
+
     Bundle args;
 
-    args=getArguments();
-
-    placeName=args.getString(ARG_PLACE_NAME);
-
-    placeLocation=new LatLng(args.getDouble(ARG_PLACE_LAT), args.getDouble(ARG_PLACE_LNG));
+    databaseManager=DatabaseManager.getInstance(getContext());
 
     googleMap=null;
     myLocation=null;
+
+    args=getArguments();
+
+    if(args!=null)
+        {
+        setPlaceMarker(args.getLong(ARG_PLACE_ID));
+        }
     }
 
 
@@ -98,7 +114,7 @@ private MapView mapView;
             @Override
             public void onClick(View v)
             {
-            moveUserMarker();
+            animateMyLocation();
             }
         });
 
@@ -117,8 +133,13 @@ private MapView mapView;
     {
     this.googleMap=googleMap;
 
-    googleMap.addMarker(new MarkerOptions().position(placeLocation).title(placeName));//.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_place_marker)));
-    googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(placeLocation, DEFAULT_ZOOM));
+    if(placeLocation!=null)
+        {
+        createPlaceMarker();
+        }else
+            {
+            animateMyLocation();
+            }
 
     if(PermissionManager.hasPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION))
         {
@@ -129,7 +150,62 @@ private MapView mapView;
     }
 
 
-    private void moveUserMarker()
+    private void createPlaceMarker()
+    {
+
+    if(placeMarker==null)
+        {
+        placeMarker=googleMap.addMarker(new MarkerOptions().position(placeLocation).title(placeName));
+        }else
+            {
+            placeMarker.setPosition(placeLocation);
+            placeMarker.setTitle(placeName);
+            }
+
+    animatePlaceMarker();
+    }
+
+
+    public void setPlaceMarker(long placeId)
+    {
+    Place place=databaseManager.getPlace(placeId);
+
+    placeName=place.getName();
+
+    placeLocation=new LatLng(place.getLat(), place.getLng());
+
+    if(googleMap!=null)
+        {
+        createPlaceMarker();
+        }
+    }
+
+
+    public void removePlaceMarker()
+    {
+
+    if(placeMarker!=null)
+        {
+        placeMarker.remove();
+
+        placeName=null;
+        placeMarker=null;
+        placeLocation=null;
+        }
+    }
+
+
+    public void animatePlaceMarker()
+    {
+
+    if(placeMarker!=null)
+        {
+        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(placeLocation, DEFAULT_ZOOM));
+        }
+    }
+
+
+    private void animateMyLocation()
     {
 
     if(myLocation!=null && googleMap != null)
@@ -150,8 +226,12 @@ private MapView mapView;
         if(isCreated())
             {
             myLocationButton.setVisibility(View.VISIBLE);
-            }
 
+            if(placeLocation==null)
+                {
+                animateMyLocation();
+                }
+            }
         }
     }
 

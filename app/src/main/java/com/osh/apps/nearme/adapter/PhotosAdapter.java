@@ -62,7 +62,7 @@ private View [] items;
             });
 
         images[position].setImageView(imageView);
-        images[position].load(0, container.getHeight());
+        images[position].load(container.getWidth(), container.getHeight());
         }
 
 

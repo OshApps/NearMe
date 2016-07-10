@@ -9,6 +9,7 @@ import android.support.annotation.RequiresPermission;
 import android.support.v7.app.AppCompatActivity;
 
 import com.osh.apps.nearme.R;
+import com.osh.apps.nearme.app.AppData;
 import com.osh.apps.nearme.dialog.SimpleAlertDialog;
 import com.osh.apps.nearme.location.LocationTrackerManager;
 import com.osh.apps.nearme.permission.PermissionManager;
@@ -29,12 +30,15 @@ private Runnable lastAction;
 
 abstract protected void onCreate();
 abstract protected void onCreateView();
+abstract protected void onCreateFragments();
 
 
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
     super.onCreate(savedInstanceState);
+
+    AppData.setAppLocale(this);
 
     onCreate();
 
@@ -43,6 +47,7 @@ abstract protected void onCreateView();
         createLocationTrackerManager();
         }
 
+    onCreateFragments();
     onCreateView();
     }
 

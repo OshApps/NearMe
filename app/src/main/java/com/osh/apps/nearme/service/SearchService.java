@@ -79,7 +79,7 @@ public static final int STATUS_ERROR=3;
 
     databaseManager=DatabaseManager.getInstance(this);
 
-    databaseManager.removeLastSearch();
+    databaseManager.deleteLastSearch();
 
     status=STATUS_ERROR;
 
@@ -119,17 +119,20 @@ public static final int STATUS_ERROR=3;
                 website=null;
                 rating=0;
 
-                try{
-                   phone=placeDetails.getString("international_phone_number");
-                   }catch(Exception e){}
+                if(placeDetails.has("international_phone_number"))
+                    {
+                    phone=placeDetails.getString("international_phone_number");
+                    }
 
-                try{
-                   website=placeDetails.getString("website");
-                   }catch(Exception e){}
+                if(placeDetails.has("website"))
+                    {
+                    website=placeDetails.getString("website");
+                    }
 
-                try {
+                if(placeDetails.has("rating"))
+                    {
                     rating=(float) place.getDouble("rating");
-                    }catch(Exception e){}
+                    }
 
                 location=placeDetails.getJSONObject("geometry").getJSONObject("location");
 

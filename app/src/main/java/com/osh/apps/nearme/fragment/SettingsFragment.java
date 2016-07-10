@@ -21,6 +21,11 @@ import com.osh.apps.nearme.widget.preference.SeekBarPreference;
  */
 public class SettingsFragment extends PreferenceFragment implements Preference.OnPreferenceChangeListener, SeekBarPreference.OnSummaryChangeListener, Preference.OnPreferenceClickListener
 {
+public static final String TAG="SettingsFragment";
+
+public static final String KEY_FAVOURITES_STATE="isFavouritesRemoved";
+public static final String KEY_DISTANCE_STATE="isDistanceTypeChanged";
+
 private static final int MIN_RADIUS=100;
 private static final int MAX_RADIUS=5000;
 private static final int STEP_RADIUS=100;
@@ -30,6 +35,13 @@ private IntegerListPreference distanceType;
 private DatabaseManager databaseManager;
 private SeekBarPreference searchRadius;
 private Context context;
+
+
+    public static SettingsFragment newInstance()
+    {
+    SettingsFragment fragment=new SettingsFragment();
+    return fragment;
+    }
 
 
     @Override
@@ -87,6 +99,29 @@ private Context context;
 
 
     @Override
+    public void onActivityCreated(Bundle savedInstanceState)
+    {
+    super.onActivityCreated(savedInstanceState);
+
+    if (savedInstanceState != null)
+        {
+        isFavouritesRemoved=savedInstanceState.getBoolean(KEY_FAVOURITES_STATE);
+        isDistanceTypeChanged=savedInstanceState.getBoolean(KEY_DISTANCE_STATE);
+        }
+    }
+
+
+    @Override
+    public void onSaveInstanceState(Bundle outState)
+    {
+    super.onSaveInstanceState(outState);
+
+    outState.putBoolean(KEY_FAVOURITES_STATE, isFavouritesRemoved);
+    outState.putBoolean(KEY_DISTANCE_STATE, isDistanceTypeChanged);
+    }
+
+
+    @Override
     public boolean onPreferenceChange(Preference preference, Object newValue)
     {
 
@@ -115,7 +150,7 @@ private Context context;
             @Override
             public void onPositive(DialogInterface dialog)
             {
-            databaseManager.removeAllFavourites();
+            databaseManager.deleteAllFavourites();
             isFavouritesRemoved=true;
             }
 

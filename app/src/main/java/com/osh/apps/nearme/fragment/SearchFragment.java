@@ -18,8 +18,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.osh.apps.nearme.R;
-import com.osh.apps.nearme.activity.callback.HomeActivityCallback;
+import com.osh.apps.nearme.activity.callback.PlaceListCallback;
 import com.osh.apps.nearme.adapter.PlaceAdapter;
+import com.osh.apps.nearme.app.AppData;
 import com.osh.apps.nearme.database.DatabaseManager;
 import com.osh.apps.nearme.place.Place;
 import com.osh.apps.nearme.service.SearchService;
@@ -31,7 +32,7 @@ public class SearchFragment extends BaseFragment implements CustomRecyclerView.O
 private static final int TITLE_RES=R.string.title_tab_search;
 private static final String KEY_SEARCH_STATE="isSearching";
 
-private HomeActivityCallback homeActivityCallback;
+private PlaceListCallback placeListCallback;
 private CustomRecyclerView recyclerView;
 private DatabaseManager databaseManager;
 private SearchReceiver searchReceiver;
@@ -68,7 +69,7 @@ private TextView msg;
     adapter=new PlaceAdapter(getContext(), R.layout.rv_search_place_item);
     adapter.setPlaces(databaseManager.getLastSearch());
 
-    location=homeActivityCallback.getCurrentLocation();
+    location=placeListCallback.getCurrentLocation();
 
     if(location!=null)
         {
@@ -112,7 +113,8 @@ private TextView msg;
 
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
+    public void onActivityCreated(Bundle savedInstanceState)
+    {
     super.onActivityCreated(savedInstanceState);
     boolean isSearching;
 
@@ -143,12 +145,12 @@ private TextView msg;
     {
     super.onAttach(context);
 
-    if(context instanceof HomeActivityCallback)
+    if(context instanceof PlaceListCallback)
         {
-        homeActivityCallback=(HomeActivityCallback) context;
+        placeListCallback=(PlaceListCallback) context;
         }else
             {
-            throw new RuntimeException(context.toString()+" must implement HomeActivityCallback");
+            throw new RuntimeException(context.toString()+" must implement PlaceListCallback");
             }
     }
 
@@ -158,7 +160,7 @@ private TextView msg;
     {
     super.onDetach();
 
-    homeActivityCallback=null;
+    placeListCallback=null;
     }
 
 
@@ -172,13 +174,17 @@ private TextView msg;
 
     public void onSearch(String keyword, double lat, double lng)
     {
-    onHideMessage();
 
-    adapter.clearPlaces();
+    if(loading.getVisibility() == View.GONE)
+        {
+        onHideMessage();
 
-    loading.setVisibility(View.VISIBLE);
+        adapter.clearPlaces();
 
-    SearchService.startActionSearch(getContext(), keyword, lat, lng);
+        loading.setVisibility(View.VISIBLE);
+
+        SearchService.startActionSearch(getContext(), keyword, lat, lng);
+        }
     }
 
 
@@ -271,6 +277,10 @@ private TextView msg;
                     openPlaceDetailsActivity(position);
                     break;
 
+                    case R.id.p_share:
+                    AppData.sharePlace(getContext(), adapter.getItem(position));
+                    break;
+
                     case R.id.p_add_favourites:
                     updateFavourite(position);
                     break;
@@ -308,15 +318,15 @@ private TextView msg;
 
     isFavoritePlace=!place.isFavourite();
 
-    databaseManager.updatePlace(place.getId(), isFavoritePlace );
+    databaseManager.updatePlaceWithDelete(place.getId(), isFavoritePlace );
 
 
     if(isFavoritePlace)
         {
-        homeActivityCallback.onAddFavouritePlace(new Place(place));
+        placeListCallback.onAddFavouritePlace(new Place(place));
         }else
             {
-            homeActivityCallback.onRemoveFavouritePlace(this, place.getId());
+            placeListCallback.onRemoveFavouritePlace(this, place.getId());
             }
 
     place.setFavourite(isFavoritePlace);
@@ -344,6 +354,15 @@ private TextView msg;
     }
 
 
+    public void clear()
+    {
+    if(isCreated())
+        {
+        adapter.clearPlaces();
+        }
+    }
+
+
     public void onFavouritePlaceRemoved(long placeId)
     {
     int position;
@@ -367,7 +386,7 @@ private TextView msg;
 
     place=adapter.getItem(position);
 
-    homeActivityCallback.openPlaceDetailsActivity(place.getId());
+    placeListCallback.onClickPlace(place);
     }
 
 
@@ -395,7 +414,7 @@ private TextView msg;
             {
             case SearchService.STATUS_OK:
             adapter.setPlaces(databaseManager.getLastSearch());
-            onLocationChanged(homeActivityCallback.getCurrentLocation());
+            onLocationChanged(placeListCallback.getCurrentLocation());
             break;
 
             case SearchService.STATUS_ZERO_RESULTS:

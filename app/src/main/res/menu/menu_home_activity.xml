@@ -5,9 +5,15 @@
     <item
         android:id="@+id/m_search"
         android:icon="@android:drawable/ic_menu_search"
-        app:showAsAction="always"
         app:actionViewClass="android.support.v7.widget.SearchView"
         android:title="@string/search"
+        />
+
+    <item
+        android:id="@+id/m_search_nearme"
+        android:icon="@android:drawable/ic_menu_mylocation"
+        android:title="@string/search_near_me"
+        android:visible="false"
         />
 
     <item

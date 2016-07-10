@@ -13,8 +13,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.osh.apps.nearme.R;
-import com.osh.apps.nearme.activity.callback.HomeActivityCallback;
+import com.osh.apps.nearme.activity.callback.PlaceListCallback;
 import com.osh.apps.nearme.adapter.PlaceAdapter;
+import com.osh.apps.nearme.app.AppData;
 import com.osh.apps.nearme.database.DatabaseManager;
 import com.osh.apps.nearme.place.Place;
 import com.osh.apps.nearme.widget.recyclerview.CustomRecyclerView;
@@ -24,7 +25,7 @@ public class FavouritesFragment extends BaseFragment implements CustomRecyclerVi
 {
 private static final int TITLE_RES=R.string.title_tab_favourites;
 
-private HomeActivityCallback homeActivityCallback;
+private PlaceListCallback placeListCallback;
 private CustomRecyclerView recyclerView;
 private DatabaseManager databaseManager;
 private PlaceAdapter adapter;
@@ -59,14 +60,14 @@ private TextView msg;
     adapter=new PlaceAdapter(getContext(), R.layout.rv_favourite_place_item);
     adapter.setPlaces(databaseManager.getFavouritePlaces());
 
-    location=homeActivityCallback.getCurrentLocation();
+    location=placeListCallback.getCurrentLocation();
 
     if(location!=null)
         {
         adapter.updateDistance(location.getLatitude(),location.getLongitude());
         }
 
-    onLocationChanged(homeActivityCallback.getCurrentLocation());
+    onLocationChanged(placeListCallback.getCurrentLocation());
     }
 
 
@@ -93,12 +94,12 @@ private TextView msg;
     {
     super.onAttach(context);
 
-    if(context instanceof HomeActivityCallback)
+    if(context instanceof PlaceListCallback)
             {
-            homeActivityCallback=(HomeActivityCallback) context;
+            placeListCallback=(PlaceListCallback) context;
             }else
                 {
-                throw new RuntimeException(context.toString()+" must implement HomeActivityCallback");
+                throw new RuntimeException(context.toString()+" must implement PlaceListCallback");
                 }
     }
 
@@ -108,7 +109,7 @@ private TextView msg;
     {
     super.onDetach();
 
-    homeActivityCallback=null;
+    placeListCallback=null;
     }
 
 
@@ -194,6 +195,10 @@ private TextView msg;
                     openPlaceDetailsActivity(position);
                     break;
 
+                    case R.id.p_share:
+                    AppData.sharePlace(getContext(), adapter.getItem(position));
+                    break;
+
                     case R.id.p_delete:
                     deletePlace(position);
                     break;
@@ -225,9 +230,9 @@ private TextView msg;
     placeId=adapter.getItemId(position);
     adapter.removePlace(position);
 
-    databaseManager.updatePlace(placeId, false);
+    databaseManager.updatePlaceWithDelete(placeId, false);
 
-    homeActivityCallback.onRemoveFavouritePlace(this, placeId);
+    placeListCallback.onRemoveFavouritePlace(this, placeId);
 
     updateMessage();
     }
@@ -249,6 +254,7 @@ private TextView msg;
         }else if(!isFavouritePlace && place!=null)
             {
             adapter.removePlace(placeId);
+            updateMessage();
             }
     }
 
@@ -272,7 +278,7 @@ private TextView msg;
 
     place=adapter.getItem(position);
 
-    homeActivityCallback.openPlaceDetailsActivity(place.getId());
+    placeListCallback.onClickPlace(place);
     }
 
 

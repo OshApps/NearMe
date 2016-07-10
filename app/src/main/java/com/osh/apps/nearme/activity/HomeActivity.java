@@ -3,16 +3,20 @@ package com.osh.apps.nearme.activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -21,58 +25,65 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
+import com.osh.apps.nearme.menu.PlaceMenu;
 import com.osh.apps.nearme.R;
-import com.osh.apps.nearme.activity.callback.HomeActivityCallback;
+import com.osh.apps.nearme.activity.callback.PlaceDetailsCallback;
+import com.osh.apps.nearme.activity.callback.PlaceListCallback;
 import com.osh.apps.nearme.adapter.FragmentsAdapter;
 import com.osh.apps.nearme.app.AppData;
+import com.osh.apps.nearme.database.DatabaseManager;
 import com.osh.apps.nearme.dialog.SimpleAlertDialog;
+import com.osh.apps.nearme.fragment.DetailsFragment;
 import com.osh.apps.nearme.fragment.FavouritesFragment;
+import com.osh.apps.nearme.fragment.MapFragment;
 import com.osh.apps.nearme.fragment.SearchFragment;
 import com.osh.apps.nearme.location.LocationTrackerManager;
 import com.osh.apps.nearme.place.Place;
 
 import java.util.List;
-import java.util.Locale;
 
 
-public class HomeActivity extends BaseActivity implements HomeActivityCallback
+public class HomeActivity extends BaseActivity implements PlaceListCallback,PlaceDetailsCallback, PlaceMenu.Callback
 {
 private static final int SETTINGS_REQUEST=1;
 
 private ConnectivityManager connectivityManager;
 private FavouritesFragment favouritesFragment;
 private FragmentsAdapter fragmentsAdapter;
+private FragmentManager fragmentManager;
+private DetailsFragment detailsFragment;
+private DatabaseManager databaseManager;
 private SearchFragment searchFragment;
 private int searchFragmentPosition;
+private MapFragment mapFragment;
 private SearchView searchView;
+private PlaceMenu placeMenu;
 private ViewPager viewPager;
+private boolean isLandscape;
 private long lastPlaceId;
 
 
+    @Override
     protected void onCreate()
     {
-    FragmentManager fragmentManager;
-
     lastPlaceId=AppData.NULL_DATA;
 
+    placeMenu=new PlaceMenu(this);
+
+    databaseManager=DatabaseManager.getInstance(this);
+
+    isLandscape=getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
+
     connectivityManager=(ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-
-    fragmentManager=getSupportFragmentManager();
-
-    onCreateFragments(fragmentManager);
-
-    fragmentsAdapter=new FragmentsAdapter( this ,fragmentManager , searchFragment, favouritesFragment );
-
-    searchFragmentPosition=fragmentsAdapter.getItemPosition(searchFragment);
-
-    Log.d("HA-onCreate","defaultLocale= " + Locale.getDefault().toString());
-    Log.d("HA-onCreate","resLocale= "+getResources().getConfiguration().locale.toString());
     }
 
 
-    private void onCreateFragments(FragmentManager fragmentManager)
+    @Override
+    protected void onCreateFragments()
     {
     List<Fragment> fragments;
+
+    fragmentManager=getSupportFragmentManager();
 
     fragments=fragmentManager.getFragments();
 
@@ -93,8 +104,23 @@ private long lastPlaceId;
                 favouritesFragment=(FavouritesFragment) fragment;
                 continue;
                 }
-            }
 
+            if(isLandscape)
+                {
+                if(fragment instanceof MapFragment)
+                    {
+                    mapFragment=(MapFragment) fragment;
+                    continue;
+                    }
+
+                if(fragment instanceof DetailsFragment)
+                    {
+                    detailsFragment=(DetailsFragment) fragment;
+                    continue;
+                    }
+                }
+
+            }
         }
 
     if(searchFragment == null)
@@ -106,30 +132,51 @@ private long lastPlaceId;
         {
         favouritesFragment=FavouritesFragment.newInstance();
         }
+
+    if(isLandscape && mapFragment==null)
+        {
+        mapFragment= MapFragment.newInstance();
+        }
+
+    fragmentsAdapter=new FragmentsAdapter( this ,fragmentManager , searchFragment, favouritesFragment);
+
+    searchFragmentPosition=fragmentsAdapter.getItemPosition(searchFragment);
     }
 
 
+    @Override
     protected void onCreateView()
     {
+    TabLayout tabLayout;
+
     setContentView(R.layout.activity_home);
 
     Toolbar toolbar=(Toolbar) findViewById(R.id.toolbar);
     setSupportActionBar(toolbar);
 
-    FloatingActionButton fab=(FloatingActionButton) findViewById(R.id.fab);
-    fab.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View view)
-            {
-            onSearch(null);
-            }
-        });
-
     viewPager=(ViewPager) findViewById(R.id.ViewPager);
     viewPager.setAdapter(fragmentsAdapter);
 
-    TabLayout tabLayout = (TabLayout) findViewById(R.id.tl_tabs);
+    if(isLandscape)
+        {
+
+        fragmentManager.beginTransaction()
+                    .replace(R.id.map_container, mapFragment)
+                    .commit();
+        }else
+            {
+            FloatingActionButton fab=(FloatingActionButton) findViewById(R.id.fab);
+            fab.setOnClickListener(new View.OnClickListener()
+                {
+                    @Override
+                    public void onClick(View view)
+                    {
+                    onSearch(null);
+                    }
+                });
+            }
+
+    tabLayout = (TabLayout) findViewById(R.id.tl_tabs);
     tabLayout.setupWithViewPager(viewPager);
 
     ViewCompat.setLayoutDirection(tabLayout, ViewCompat.LAYOUT_DIRECTION_LTR);
@@ -139,11 +186,14 @@ private long lastPlaceId;
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
+    MenuItem search,searchNearMe;
 
     getMenuInflater().inflate( R.menu.menu_home_activity, menu);
 
+    search=menu.findItem( R.id.m_search);
+    search.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
 
-    searchView = (SearchView) menu.findItem( R.id.m_search).getActionView();
+    searchView = (SearchView) search.getActionView();
     searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener()
         {
             @Override
@@ -164,6 +214,14 @@ private long lastPlaceId;
 
         });
 
+    searchNearMe=menu.findItem(R.id.m_search_nearme);
+
+    if(isLandscape)
+        {
+        searchNearMe.setVisible(true);
+        searchNearMe.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        }
+
     return true;
     }
 
@@ -177,31 +235,17 @@ private long lastPlaceId;
     switch(item.getItemId())
         {
         case R.id.m_clear_history:
-        //TODO
-        //deleteDatabase(Database.DATABASE_NAME);
-
-        /* remove shared preference file
-        File folder=new File(getFilesDir().getParent()+File.separator+"shared_prefs");
-
-        File[] files=folder.listFiles();
-
-        if(files != null)
-            {
-            for(File file : files)
-                {
-                file.delete();
-                }
-            }
-
-        folder.delete();
-        */
-
+        databaseManager.deleteLastSearch();
+        searchFragment.clear();
         break;
 
         case R.id.m_setting:
-
         intent=new Intent(this, SettingsActivity.class);
         startActivityForResult(intent,SETTINGS_REQUEST);
+        break;
+
+        case R.id.m_search_nearme:
+        onSearch(null);
         break;
 
         default:
@@ -213,17 +257,37 @@ private long lastPlaceId;
 
 
     @Override
+    public void onBackPressed()
+    {
+    super.onBackPressed();
+
+    if(detailsFragment!=null)
+        {
+        detailsFragment=null;
+
+        mapFragment.removePlaceMarker();
+        }
+    }
+
+
+    @Override
     protected void onResume()
     {
     super.onResume();
 
     if(lastPlaceId != AppData.NULL_DATA)
         {
-        favouritesFragment.onPlaceChanged(lastPlaceId);
-        searchFragment.onPlaceChanged(lastPlaceId);
+        onPlaceChanged(lastPlaceId);
 
         lastPlaceId=AppData.NULL_DATA;
         }
+    }
+
+
+    private void onPlaceChanged(long placeId)
+    {
+    favouritesFragment.onPlaceChanged(placeId);
+    searchFragment.onPlaceChanged(placeId);
     }
 
 
@@ -253,8 +317,6 @@ private long lastPlaceId;
                     favouritesFragment.refresh();
                     }
             }
-
-
         }
 
     }
@@ -355,6 +417,16 @@ private long lastPlaceId;
     {
     searchFragment.onLocationChanged(location);
     favouritesFragment.onLocationChanged(location);
+
+    if(isLandscape)
+        {
+        mapFragment.onLocationChanged(location);
+
+        if(detailsFragment != null)
+            {
+            detailsFragment.onLocationChanged(location);
+            }
+        }
     }
 
 
@@ -378,11 +450,27 @@ private long lastPlaceId;
 
 
     @Override
-    public void openPlaceDetailsActivity(long placeId)
+    public void onClickPlace(Place place)
     {
-    lastPlaceId=placeId;
 
-    PlaceDetailsActivity.openActivity(this, placeId);
+    if(isLandscape)
+        {
+        detailsFragment=DetailsFragment.newInstance(place.getId());
+
+        fragmentManager.beginTransaction()
+                        .replace(R.id.container,detailsFragment)
+                        .addToBackStack("details")
+                        .commit();
+
+        mapFragment.setPlaceMarker(place.getId());
+
+        placeMenu.startActionMode(place);
+        }else
+            {
+            lastPlaceId=place.getId();
+
+            PlaceDetailsActivity.openActivity(this, lastPlaceId);
+            }
     }
 
 
@@ -406,4 +494,48 @@ private long lastPlaceId;
     favouritesFragment.onFavouritePlaceAdded(place);
     }
 
+
+    @Override
+    public void onClickDetail()
+    {
+    if(mapFragment != null)
+        {
+        mapFragment.animatePlaceMarker();
+        }
+    }
+
+
+    @Override
+    public void onStartPlaceActionMode(ActionMode.Callback callback)
+    {
+    startSupportActionMode(callback);
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+        {
+        getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
+        }
+    }
+
+
+    @Override
+    public void onFavouriteToggleChanged(long placeId, boolean isFavouritePlace)
+    {
+    databaseManager.updatePlace(placeId, isFavouritePlace);
+
+    onPlaceChanged(placeId);
+    }
+
+
+    @Override
+    public void onShareSelected(Place place)
+    {
+    AppData.sharePlace(this, place);
+    }
+
+
+    @Override
+    public void onActionModeClosed()
+    {
+    onBackPressed();
+    }
 }

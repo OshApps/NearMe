@@ -8,9 +8,9 @@ import com.osh.apps.nearme.place.Place;
 /**
  * Created by oshri-n on 23/06/2016.
  */
-public interface HomeActivityCallback extends LocationCallback
+public interface PlaceListCallback extends LocationCallback
 {
-void openPlaceDetailsActivity(long placeId);
+void onClickPlace(Place place);
 void onRemoveFavouritePlace(Fragment fragment, long placeId);
 void onAddFavouritePlace(Place place);
 }

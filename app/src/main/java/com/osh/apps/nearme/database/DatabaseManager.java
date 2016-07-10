@@ -77,32 +77,31 @@ private static DatabaseManager instance;
     {
     String updateCols,whereCols;
 
-    try {
-        updateCols=addColStatement(Table.Places.COL_FAVOURITE, String.valueOf(isFavourite? Table.TRUE: Table.FALSE), false);
-        whereCols=addColStatement(Table.Places.COL_PLACE_ID, String.valueOf(placeId), false);
+    updateCols=addColStatement(Table.Places.COL_FAVOURITE, String.valueOf(isFavourite? Table.TRUE: Table.FALSE), false);
+    whereCols=addColStatement(Table.Places.COL_PLACE_ID, String.valueOf(placeId), false);
 
-        updateFromTable(Table.Places.TABLE_NAME, updateCols, whereCols);
+    updateFromTable(Table.Places.TABLE_NAME, updateCols, whereCols);
+    }
 
-        if(!isFavourite)
-            {
-            deleteFromTable(Table.Places.TABLE_NAME, addColStatement(Table.Places.COL_PLACE_ID, String.valueOf(placeId), false) + addColStatement(Table.Places.COL_SEARCH, String.valueOf(Table.FALSE), false, OPERATOR_AND));
-            }
 
-        }catch (SQLException e)
-            {
-            Log.e("DatabaseManager","Error: Failed to update place");
-            e.printStackTrace();
-            }
+    public void updatePlaceWithDelete(long placeId, boolean isFavourite)
+    {
+    updatePlace(placeId, isFavourite);
+
+    if(!isFavourite)
+        {
+        deleteFromTable(Table.Places.TABLE_NAME, addColStatement(Table.Places.COL_PLACE_ID, String.valueOf(placeId), false) + addColStatement(Table.Places.COL_SEARCH, String.valueOf(Table.FALSE), false, OPERATOR_AND));
+        }
     }
 
 
     /**
      * where col name = TRUE
      *
-     * @param whereColName COL_FAVOURITE or  COL_SEARCH
+     * @param whereColName COL_FAVOURITE or COL_SEARCH
      *
     */
-    public ArrayList<Place> getPlaces(String whereColName)
+    private ArrayList<Place> getPlaces(String whereColName)
     {
     int placeIdIndex,googleIdIndex,nameIndex,addressIndex,latIndex,lngIndex,ratingIndex,iconUrlIndex,phoneIndex,websiteIndex,isFavouriteIndex;
     ArrayList<Place> places=null;
@@ -162,14 +161,14 @@ private static DatabaseManager instance;
     }
 
 
-    public void removeLastSearch()
+    public void deleteLastSearch()
     {
     updateFromTable(Table.Places.TABLE_NAME, addColStatement(Table.Places.COL_SEARCH, String.valueOf(Table.FALSE), false) , null);
     deleteFromTable(Table.Places.TABLE_NAME, addColStatement(Table.Places.COL_FAVOURITE, String.valueOf(Table.FALSE), false));
     }
 
 
-    public void removeAllFavourites()
+    public void deleteAllFavourites()
     {
     updateFromTable(Table.Places.TABLE_NAME, addColStatement(Table.Places.COL_FAVOURITE, String.valueOf(Table.FALSE), false) , null);
     deleteFromTable(Table.Places.TABLE_NAME, addColStatement(Table.Places.COL_SEARCH, String.valueOf(Table.FALSE), false));
@@ -209,7 +208,5 @@ private static DatabaseManager instance;
     return isExist(Table.Places.TABLE_NAME, addColStatement(Table.Places.COL_PLACE_ID, String.valueOf(placeId), false)+
                                             addColStatement(Table.Places.COL_FAVOURITE, String.valueOf(Table.TRUE), false, OPERATOR_AND));
     }
-
-
 
 }
