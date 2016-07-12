@@ -1,6 +1,7 @@
 package com.osh.apps.nearme.adapter;
 
 import android.content.Context;
+import android.support.annotation.LayoutRes;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,12 +23,12 @@ public class PlaceAdapter extends RecyclerView.Adapter<PlaceHolder>
 {
 private ArrayList<Place> places;
 private LayoutInflater inflater;
-private int layout;
+private int layoutRes;
 
 
-    public PlaceAdapter(Context context, int layout)
+    public PlaceAdapter(Context context,@LayoutRes int layoutRes)
     {
-    this.layout=layout;
+    this.layoutRes=layoutRes;
 
     inflater = LayoutInflater.from(context);
 
@@ -41,9 +42,9 @@ private int layout;
     PlaceHolder viewHolder;
     View itemView;
 
-    itemView=inflater.inflate(layout, null);
+    itemView=inflater.inflate(layoutRes, null);
 
-    if(layout == SearchPlaceHolder.LAYOUT_RES)
+    if(layoutRes== SearchPlaceHolder.LAYOUT_RES)
         {
         viewHolder= new SearchPlaceHolder(itemView);
         }else

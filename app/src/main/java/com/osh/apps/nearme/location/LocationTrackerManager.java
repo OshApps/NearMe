@@ -67,8 +67,7 @@ private Handler handler;
     hasGPSProvider=providers.contains(LocationManager.GPS_PROVIDER);
     hasNetworkProvider=providers.contains(LocationManager.NETWORK_PROVIDER);
 
-    isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-    isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+    updateLocationState();
 
     if(isGPSEnabled || isNetworkEnabled)
         {
@@ -176,12 +175,21 @@ private Handler handler;
     }
 
 
+    private void updateLocationState()
+    {
+    isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+    }
+
+
     public void registerLocationUpdates(OnLocationChangedListener locationChangedListener)
     {
     this.locationChangedListener=locationChangedListener;
 
     if(!isRegistered)
         {
+
+        updateLocationState();
 
         if(hasGPSProvider && gpsListener!=null)
             {

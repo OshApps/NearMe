@@ -37,10 +37,10 @@ private int defaultValue;
 
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
         {
-        title.setTextAppearance(view.getContext(), android.R.attr.textAppearanceMedium);
+        title.setTextAppearance(view.getContext(), android.R.style.TextAppearance_DeviceDefault_Medium);
         }else
             {
-            title.setTextAppearance(android.R.attr.textAppearanceMedium);
+            title.setTextAppearance(android.R.style.TextAppearance_DeviceDefault_Medium);
             }
     }
 
