@@ -1,5 +1,5 @@
 <resources>
-    <string name="language" >en_US</string>
+    <string name="language">en_US</string>
 
     <string name="app_name">NearMe</string>
 
@@ -49,5 +49,6 @@
     <string name="share">Share</string>
     <string name="search_near_me">Search Near Me</string>
 
-    <string name="google_api_key" translatable="false">AIzaSyC5I_AJm7WkW3TXMu3XvLWIn7EvA8Asr2c</string>
+    <string name="maps_api_key" translatable="false">AIzaSyC5I_AJm7WkW3TXMu3XvLWIn7EvA8Asr2c</string>
+    <string name="places_api_key" translatable="false">AIzaSyBOSebPLxD2Px4zVv31kwmAQ1puJeK3Fz0</string>
 </resources>

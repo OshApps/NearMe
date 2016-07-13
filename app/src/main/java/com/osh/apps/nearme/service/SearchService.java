@@ -79,17 +79,20 @@ public static final int STATUS_ERROR=3;
 
     databaseManager=DatabaseManager.getInstance(this);
 
-    databaseManager.deleteLastSearch();
-
     status=STATUS_ERROR;
 
-    apiKey=getString(R.string.google_api_key);
+    apiKey=getString(R.string.places_api_key);
 
     url=AppData.PlacesAPI.createSearchUrl(keyword, lat , lng, AppData.Preferences.getRadius(this), apiKey);
 
     try {
         json=new JSONObject(JsonConnection.getJsonResult(url));
         results=json.getJSONArray("results");
+
+        if(results.length() > 0)
+            {
+            databaseManager.deleteLastSearch();
+            }
 
         for(int i=0 ; i < results.length() ; i++)
                 {
